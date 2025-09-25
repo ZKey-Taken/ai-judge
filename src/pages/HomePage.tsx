@@ -1,6 +1,6 @@
 import {type ChangeEvent, type FC, useRef, useState} from "react";
 import {SendHorizonal, Upload} from "lucide-react";
-import "./Pages.css";
+import "./HomePage.css";
 
 const HomePage: FC = () => {
     const buttonSize: number = 25;

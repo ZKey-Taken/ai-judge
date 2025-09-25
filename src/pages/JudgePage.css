@@ -1,0 +1,80 @@
+.judge-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+    font-family: sans-serif;
+}
+
+.judge-form,
+.judge-list {
+    margin-top: 2rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.judge-name {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.judge-form textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.judge-form select {
+    display: block;
+    box-sizing: border-box;
+    padding: 0.5rem;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.model-active-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.judge-active-button {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.add-judge-btn {
+    display: block;
+    margin-top: 1rem;
+}
+
+
+.judge-form button {
+    padding: 0.5rem 1rem;
+    background: #0077ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.judge-form button:hover {
+    background: #005ecc;
+}
