@@ -1,14 +1,22 @@
 import React, {type FC} from "react";
 import './App.css';
 import {FileText, Gavel, Home} from 'lucide-react';
-import {BrowserRouter, Route, Routes, useLocation, useNavigate} from 'react-router-dom';
+import {
+    BrowserRouter,
+    type Location,
+    type NavigateFunction,
+    Route,
+    Routes,
+    useLocation,
+    useNavigate
+} from 'react-router-dom';
 import SubmissionsPage from "./pages/SubmissionsPage.tsx";
 import HomePage from "./pages/HomePage.tsx";
 import JudgesPage from "./pages/JudgesPage.tsx";
 
 const Layout: FC<{ children: React.ReactNode }> = ({children}) => {
-    const navigate = useNavigate();
-    const location = useLocation();
+    const navigate: NavigateFunction = useNavigate();
+    const location: Location = useLocation();
 
     const buttonSize: number = 20;
 

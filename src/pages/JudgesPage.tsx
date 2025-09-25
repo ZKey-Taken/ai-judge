@@ -1,7 +1,7 @@
 const JudgesPage = () => {
     /*
     TODO:
-    - CRUD for judges: create (must), edit (must), deactivate/activate (optional).
+    - CRUD for judges: create, edit, deactivate/activate.
     - List all judges user has created.
     - Can later be used when assigning judges to questions.
     */
