@@ -13,6 +13,9 @@ import {
 import SubmissionsPage from "./pages/SubmissionsPage.tsx";
 import HomePage from "./pages/HomePage.tsx";
 import JudgesPage from "./pages/JudgesPage.tsx";
+import {AuthProvider} from "./lib/AuthProvider.tsx";
+import {useAuth} from "./hooks/useAuth.ts";
+import {AuthForm} from "./auth/AuthForm.tsx";
 
 const Layout: FC<{ children: React.ReactNode }> = ({children}) => {
     const navigate: NavigateFunction = useNavigate();
@@ -55,17 +58,33 @@ const Layout: FC<{ children: React.ReactNode }> = ({children}) => {
     );
 };
 
+const AppRoutes: FC = () => {
+    const {user} = useAuth();
+
+    if (!user) {
+        return <AuthForm/>;
+    }
+
+    console.log("User:", user);
+
+    return (
+        <Layout>
+            <Routes>
+                <Route path="/" element={<HomePage/>}/>
+                <Route path="/submission" element={<SubmissionsPage/>}/>
+                <Route path="/judge" element={<JudgesPage/>}/>
+            </Routes>
+        </Layout>
+    );
+}
+
 const App: FC = () => {
     return (
-        <BrowserRouter>
-            <Layout>
-                <Routes>
-                    <Route path="/" element={<HomePage/>}/>
-                    <Route path="/submission" element={<SubmissionsPage/>}/>
-                    <Route path="/judge" element={<JudgesPage/>}/>
-                </Routes>
-            </Layout>
-        </BrowserRouter>
+        <AuthProvider>
+            <BrowserRouter>
+                <AppRoutes/>
+            </BrowserRouter>
+        </AuthProvider>
     );
 };
 
