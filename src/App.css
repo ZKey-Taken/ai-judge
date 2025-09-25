@@ -69,6 +69,7 @@ body {
 }
 
 .logout-button {
+    margin-top: auto;
     background-color: #ff7474;
 }
 

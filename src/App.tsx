@@ -67,12 +67,14 @@ const Layout: FC<{ children: React.ReactNode }> = ({children}) => {
 };
 
 const AppRoutes: FC = () => {
-    const {user} = useAuth();
+    const {user, loading} = useAuth();
 
-    if (!user) {
+    if (loading) {
+        return <></>;
+    } else if (!user) {
         return <AuthForm/>;
     }
-    
+
     return (
         <Layout>
             <Routes>
