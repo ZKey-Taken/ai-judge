@@ -3,10 +3,14 @@ import {supabase} from "./Supabase.ts"
 import type {User} from "@supabase/supabase-js"
 
 type AuthContextType = {
-    user: User | null
+    user: User | null;
+    logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({user: null});
+const AuthContext = createContext<AuthContextType>({
+    user: null, logout: async () => {
+    }
+});
 
 function AuthProvider({children}: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -23,8 +27,12 @@ function AuthProvider({children}: { children: ReactNode }) {
         return () => subscription.unsubscribe();
     }, []);
 
+    const logout = async () => {
+        await supabase.auth.signOut();
+    };
+
     return (
-        <AuthContext.Provider value={{user}}>
+        <AuthContext.Provider value={{user, logout}}>
             {children}
         </AuthContext.Provider>
     );

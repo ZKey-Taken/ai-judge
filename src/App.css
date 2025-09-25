@@ -68,6 +68,14 @@ body {
     background-color: #7c3aed;
 }
 
+.logout-button {
+    background-color: #ff7474;
+}
+
+.logout-button:hover {
+    background-color: #ed4646;
+}
+
 .main-content {
     flex: 1;
     overflow-y: auto;

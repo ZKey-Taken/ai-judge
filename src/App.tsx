@@ -1,6 +1,6 @@
 import React, {type FC} from "react";
 import './App.css';
-import {FileText, Gavel, Home} from 'lucide-react';
+import {FileText, Gavel, Home, LogOut} from 'lucide-react';
 import {
     BrowserRouter,
     type Location,
@@ -20,6 +20,7 @@ import {AuthForm} from "./auth/AuthForm.tsx";
 const Layout: FC<{ children: React.ReactNode }> = ({children}) => {
     const navigate: NavigateFunction = useNavigate();
     const location: Location = useLocation();
+    const {logout} = useAuth();
 
     const buttonSize: number = 20;
 
@@ -49,6 +50,13 @@ const Layout: FC<{ children: React.ReactNode }> = ({children}) => {
                 >
                     <Gavel size={buttonSize}/>
                 </button>
+
+                <button className="nav-button logout-button" onClick={async () => {
+                    await logout();
+                    navigate('/');
+                }}>
+                    <LogOut size={buttonSize}/>
+                </button>
             </nav>
 
             <main className="main-content">
@@ -64,9 +72,7 @@ const AppRoutes: FC = () => {
     if (!user) {
         return <AuthForm/>;
     }
-
-    console.log("User:", user);
-
+    
     return (
         <Layout>
             <Routes>
