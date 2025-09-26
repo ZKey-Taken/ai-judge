@@ -1,91 +1,22 @@
-import {type ChangeEvent, type FC, useRef, useState} from "react";
-import {SendHorizonal, Upload} from "lucide-react";
+import {type FC, useState} from "react";
 import "./HomePage.css";
-import JSON5 from 'json5';
-import {type Appendix} from "../lib/Types.ts";
+import {type Appendix, Steps} from "../lib/Types.ts";
+import UploadFileStep from "../components/UploadFileStep.tsx";
 
 const HomePage: FC = () => {
-    const buttonSize: number = 25;
-
-    // const [currentStep, setCurrentStep] = useState<Steps>(Steps.UploadFile);
-    const [jsonPreview, setJsonPreview] = useState<string>("");
-    // TODO: Bonus, save non-JSON files for LLM uses
-    // const [file, setFile] = useState<File | null>(null)
-
-
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-    const handleFileUpload = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        try {
-            const text = await file.text();
-            const json = JSON5.parse(text);
-            const jsonString: string = JSON.stringify(json, null, 2);
-            setJsonPreview(jsonString);
-
-            requestAnimationFrame(() => {
-                if (textareaRef.current) {
-                    textareaRef.current.style.height = "auto";
-                    textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
-                }
-            });
-        } catch (error) {
-            console.error('Invalid JSON:', error);
-            setJsonPreview("Invalid JSON file");
-            // Not JSON file, bonus: we save for LLM uses
-            return;
-        }
-    };
-
-
-    const handleSubmit = () => {
-        try {
-            const parsedAppendix: Appendix[] = JSON5.parse(jsonPreview);
-            console.log(parsedAppendix);
-        } catch {
-            /* empty */
-        }
-    };
+    const [currentStep, setCurrentStep] = useState<Steps>(Steps.UploadFile);
+    const [appendix, setAppendix] = useState<Appendix[]>();
 
     return (
         <div className="home-page">
-            <div className="search-upload-container">
-                <div className="search-wrapper">
-                    <input
-                        className="file-input"
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                    />
-                    <button type="button" className="upload-button" onClick={handleFileUpload}>
-                        <Upload size={buttonSize}/>
-                    </button>
-
-                    <textarea
-                        ref={textareaRef}
-                        className="search-input"
-                        placeholder="Upload a JSON file to preview it"
-                        value={jsonPreview}
-                        rows={1}
-                        readOnly
-                    />
-
-                    <button
-                        className="submit-button"
-                        onClick={handleSubmit}
-                        disabled={!jsonPreview}
-                    >
-                        <SendHorizonal size={buttonSize}/>
-                    </button>
-                </div>
-            </div>
+            {currentStep === Steps.UploadFile &&
+                <UploadFileStep
+                    onNextStep={(givenAppendixArr) => {
+                        setAppendix(givenAppendixArr);
+                        setCurrentStep(Steps.AssignJudges);
+                    }}
+                />
+            }
         </div>
     );
 };

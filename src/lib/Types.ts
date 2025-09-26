@@ -24,6 +24,10 @@ export type AddJudgeOverlayProps = {
     onError?: (message: string) => void;
 };
 
+export type UploadFileStepProps = {
+    onNextStep: (appendix: Appendix[]) => void;
+};
+
 // Others
 export type AuthContextType = {
     user: User | null;
