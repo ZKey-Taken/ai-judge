@@ -93,6 +93,39 @@ export type Database = {
         }
         Relationships: []
       }
+      question_judges: {
+        Row: {
+          created_at: string
+          judge_id: string
+          question_id: string
+        }
+        Insert: {
+          created_at?: string
+          judge_id: string
+          question_id: string
+        }
+        Update: {
+          created_at?: string
+          judge_id?: string
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_judges_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "judges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_judges_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questions: {
         Row: {
           created_at: string
