@@ -1,16 +1,7 @@
 import {type FC, type FormEvent, useState} from "react";
 import {supabase} from "../lib/Supabase.ts";
-import type {Database} from "../lib/Database.ts";
 import "./AddJudgeOverlay.css";
-
-type Judge = Database["public"]["Tables"]["judges"]["Row"];
-type JudgeInsert = Database["public"]["Tables"]["judges"]["Insert"];
-
-type AddJudgeOverlayProps = {
-    onClose: () => void;
-    onCreated: (judge: Judge) => void;
-    onError?: (message: string) => void;
-};
+import type {AddJudgeOverlayProps, Judge, JudgeInsert} from "../lib/Types.ts";
 
 export const AddJudgeOverlay: FC<AddJudgeOverlayProps> = ({
                                                               onClose,

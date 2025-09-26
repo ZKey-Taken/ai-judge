@@ -1,9 +1,7 @@
 import {type FC, useMemo, useState} from "react";
-import type {Database} from "../lib/Database.ts";
 import {supabase} from "../lib/Supabase.ts";
 import "./JudgeItem.css";
-
-type Judge = Database["public"]["Tables"]["judges"]["Row"];
+import type {Judge} from "../lib/Types.ts";
 
 type JudgeItemProps = {
     judge: Judge;

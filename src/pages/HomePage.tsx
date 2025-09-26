@@ -2,31 +2,12 @@ import {type ChangeEvent, type FC, useRef, useState} from "react";
 import {SendHorizonal, Upload} from "lucide-react";
 import "./HomePage.css";
 import JSON5 from 'json5';
-
-type Appendix = {
-    id: string;
-    queueId: string;
-    labelingTaskId: string;
-    createdAt?: number;
-    questions: {
-        rev: number;
-        data: {
-            id: string;
-            questionType: "single_choice_with_reasoning";
-            questionText: string;
-        };
-    }[];
-    answers: {
-        [questionId: string]: {
-            choice: string;
-            reasoning: string;
-        };
-    };
-};
+import {type Appendix} from "../lib/Types.ts";
 
 const HomePage: FC = () => {
     const buttonSize: number = 25;
 
+    // const [currentStep, setCurrentStep] = useState<Steps>(Steps.UploadFile);
     const [jsonPreview, setJsonPreview] = useState<string>("");
     // TODO: Bonus, save non-JSON files for LLM uses
     // const [file, setFile] = useState<File | null>(null)

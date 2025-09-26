@@ -1,12 +1,7 @@
 import {createContext, type ReactNode, useEffect, useState} from "react"
 import {supabase} from "./Supabase.ts"
 import type {User} from "@supabase/supabase-js"
-
-type AuthContextType = {
-    user: User | null;
-    loading: boolean;
-    logout: () => Promise<void>;
-}
+import type {AuthContextType} from "./Types.ts";
 
 const AuthContext = createContext<AuthContextType>({
     user: null,

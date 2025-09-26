@@ -1,14 +1,11 @@
 import {type FC, useEffect, useState} from "react";
 import "./JudgePage.css";
-import type {Database} from "../lib/Database.ts";
 import {supabase} from "../lib/Supabase.ts";
 import {ConfirmationOverlay} from "../components/Overlay.tsx";
-import type {JudgePageProps} from "../lib/Types.ts";
+import type {Judge, JudgePageProps} from "../lib/Types.ts";
 import {Loader2} from "lucide-react";
 import {JudgeItem} from "../components/JudgeItem.tsx";
 import {AddJudgeOverlay} from "../components/AddJudgeOverlay.tsx";
-
-type Judge = Database['public']['Tables']['judges']['Row'];
 
 const JudgePage: FC<JudgePageProps> = ({userId}) => {
     const [judges, setJudges] = useState<Judge[]>([]);
