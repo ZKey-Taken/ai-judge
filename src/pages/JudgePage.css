@@ -5,6 +5,7 @@
     font-family: sans-serif;
 }
 
+/* Create a judge form */
 .judge-form,
 .judge-list {
     margin-top: 2rem;
@@ -65,7 +66,6 @@
     margin-top: 1rem;
 }
 
-
 .judge-form button {
     padding: 0.5rem 1rem;
     background: #0077ff;
@@ -77,4 +77,61 @@
 
 .judge-form button:hover {
     background: #005ecc;
+}
+
+/* Existing judge list layout */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+li:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+p {
+    margin: 4px 0 0 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+/* Loading styles */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    color: #4f46e5;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

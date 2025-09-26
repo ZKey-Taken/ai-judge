@@ -80,7 +80,7 @@ const AppRoutes: FC = () => {
             <Routes>
                 <Route path="/" element={<HomePage/>}/>
                 <Route path="/submission" element={<SubmissionsPage/>}/>
-                <Route path="/judge" element={<JudgesPage/>}/>
+                <Route path="/judge" element={<JudgesPage userId={user.id}/>}/>
             </Routes>
         </Layout>
     );

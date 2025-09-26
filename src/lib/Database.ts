@@ -79,7 +79,7 @@ export type Database = {
           name: string
           system_prompt: string
           updated_at?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -112,7 +112,7 @@ export type Database = {
           id?: string
           rev: number
           submission_id: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -156,7 +156,7 @@ export type Database = {
           labeling_task_id: string
           queue_id: string
           updated_at?: string | null
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string

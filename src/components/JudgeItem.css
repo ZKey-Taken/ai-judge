@@ -1,0 +1,140 @@
+.judges-div {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.judges-div strong {
+    font-weight: 600;
+}
+
+.judges-div .prompt {
+    margin: 8px 0 12px;
+    color: #374151;
+    white-space: pre-wrap;
+    line-height: 1.4;
+}
+
+/* Status badge */
+.judges-div .status {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.judges-div .status.active {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.judges-div .status.inactive {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* Inputs */
+.judges-div .judge-name,
+.judges-div textarea,
+.judges-div select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 14px;
+    outline: none;
+}
+
+.judges-div .judge-name:focus,
+.judges-div textarea:focus,
+.judges-div select:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.judges-div textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Row that contains model selector and active checkbox */
+.judges-div .model-active-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.judges-div .judge-active-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+}
+
+/* Buttons */
+.judges-div button {
+    border: 1px solid transparent;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+
+.judges-div .edit-btn {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+    color: #111827;
+}
+
+.judges-div .edit-btn:hover {
+    background: #f3f4f6;
+}
+
+.judges-div .save-btn {
+    background: #4f46e5;
+    color: white;
+}
+
+.judges-div .save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.judges-div .cancel-btn {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.judges-div .cancel-btn:hover {
+    background: #e5e7eb;
+}
+
+.judges-div .activate {
+    background: #10b981;
+    color: white;
+}
+
+.judges-div .deactivate {
+    background: #ef4444;
+    color: white;
+}
+
+.judges-div .activate:hover {
+    filter: brightness(0.95);
+}
+
+.judges-div .deactivate:hover {
+    filter: brightness(0.95);
+}

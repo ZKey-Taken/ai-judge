@@ -1,47 +1,101 @@
-import {type FormEvent, useState} from "react";
+import {type FC, type FormEvent, useEffect, useState} from "react";
 import "./JudgePage.css";
+import type {Database} from "../lib/Database.ts";
+import {supabase} from "../lib/Supabase.ts";
+import {ConfirmationOverlay} from "../components/Overlay.tsx";
+import type {JudgePageProps} from "../lib/Types.ts";
+import {Loader2} from "lucide-react";
+import {JudgeItem} from "../components/JudgeItem.tsx";
 
-export type Judge = {
-    id: string;
-    name: string;
-    prompt: string;
-    model: string;
-    active: boolean;
-};
+type Judge = Database['public']['Tables']['judges']['Row'];
+type JudgeInsert = Database['public']['Tables']['judges']['Insert'];
 
-export default function JudgePage() {
+const JudgePage: FC<JudgePageProps> = ({userId}) => {
     const [judges, setJudges] = useState<Judge[]>([]);
-    const [name, setName] = useState("");
-    const [prompt, setPrompt] = useState("");
-    const [model, setModel] = useState("gpt-4");
-    const [active, setActive] = useState(true);
+    const [name, setName] = useState<string>("");
+    const [prompt, setPrompt] = useState<string>("");
+    const [model, setModel] = useState<string>("gpt-4");
+    const [active, setActive] = useState<boolean>(true);
+    const [loadingJudges, setLoadingJudges] = useState<boolean>(true);
+    const [overlayMessage, setOverlayMessage] = useState<string>("");
 
-    const addJudge = (e: FormEvent) => {
-        e.preventDefault();
-        if (!name.trim()) return;
+    const addJudge = async (e: FormEvent) => {
+        try {
+            e.preventDefault();
+            if (!name.trim()) return;
 
-        const newJudge: Judge = {
-            id: crypto.randomUUID(),
-            name,
-            prompt,
-            model,
-            active,
+            const newJudge: JudgeInsert = {
+                model_name: model,
+                name: name,
+                system_prompt: prompt,
+                is_active: active,
+            };
+
+            const {data, error} = await supabase
+                .from("judges")
+                .insert(newJudge)
+                .select();
+
+            if (error) {
+                setOverlayMessage("Failed to create judge:" + error.message);
+                return;
+            }
+
+            setJudges((prev) => [...prev, ...data]);
+
+            // Reset form
+            setName("");
+            setPrompt("");
+            setModel("gpt-4");
+            setActive(true);
+        } catch (error) {
+            setOverlayMessage("Failed to create judge:" + error);
+        }
+    };
+
+    const toggleActive = async (id: string, current_is_active: boolean) => {
+        try {
+            const {error} = await supabase
+                .from('judges')
+                .update({is_active: !current_is_active})
+                .match({id: id, user_id: userId});
+
+            if (error) {
+                setOverlayMessage("Failed to update judge:" + error.message);
+                return;
+            }
+
+            setJudges((prev) =>
+                prev.map((j) => (j.id === id ? {...j, is_active: !j.is_active} : j))
+            );
+        } catch (error) {
+            setOverlayMessage("Failed to update judge:" + error);
+        }
+    };
+
+    useEffect(() => {
+        const fetchJudges = async () => {
+            try {
+                const {data, error} = await supabase
+                    .from("judges")
+                    .select("*")
+                    .eq("user_id", userId);
+
+                if (error) {
+                    setOverlayMessage("Failed to fetch judges: " + error.message);
+                    return;
+                }
+
+                setJudges(data || []);
+            } catch (error) {
+                setOverlayMessage("Failed to fetch judges: " + error);
+            } finally {
+                setLoadingJudges(false);
+            }
         };
 
-        setJudges((prev) => [...prev, newJudge]);
-
-        // Reset form
-        setName("");
-        setPrompt("");
-        setModel("gpt-4");
-        setActive(true);
-    };
-
-    const toggleActive = (id: string) => {
-        setJudges((prev) =>
-            prev.map((j) => (j.id === id ? {...j, active: !j.active} : j))
-        );
-    };
+        fetchJudges();
+    }, [userId]);
 
     return (
         <div className="judge-page">
@@ -87,29 +141,48 @@ export default function JudgePage() {
             {/* Judge List */}
             <div className="judge-list">
                 <h2>Existing Judges</h2>
-                {judges.length === 0 ? (
+                {loadingJudges &&
+                    <div className="loading-container">
+                        <Loader2 className="spinner"/>
+                        <p>Loading...</p>
+                    </div>
+                }
+
+                {!loadingJudges && judges.length === 0 ? (
                     <p className="empty">
                         No judges yet. Create one above.
                     </p>
                 ) : (
                     <ul>
-                        {/*TODO: Complete the classNames later when actual judges appear*/}
                         {judges.map((j) => (
-                            <li key={j.id} className={j.active ? "" : ""}>
-                                <div>
-                                    <strong>{j.name}</strong> ({j.model})
-                                    <p>{j.prompt}</p>
-                                </div>
-                                <div className="">
-                                    <button onClick={() => toggleActive(j.id)}>
-                                        {j.active ? "Deactivate" : "Activate"}
-                                    </button>
-                                </div>
+                            <li key={j.id}>
+                                <JudgeItem
+                                    judge={j}
+                                    userId={userId}
+                                    onUpdated={(updated) =>
+                                        setJudges((prev) =>
+                                            prev.map((jj) => (jj.id === updated.id ? updated : jj))
+                                        )
+                                    }
+                                    onError={(msg) => setOverlayMessage(msg)}
+                                    onToggleActive={(id, current) => toggleActive(id, current)}
+                                />
                             </li>
                         ))}
                     </ul>
+
                 )}
             </div>
+
+            {overlayMessage &&
+                <ConfirmationOverlay
+                    title="Error"
+                    message={overlayMessage}
+                    onConfirm={() => setOverlayMessage("")}
+                />
+            }
         </div>
     );
 }
+
+export default JudgePage;
