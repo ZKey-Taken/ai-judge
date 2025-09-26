@@ -58,7 +58,15 @@ export type Database = {
           id?: string
           reasoning?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "answers_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       judges: {
         Row: {
@@ -129,42 +137,29 @@ export type Database = {
       questions: {
         Row: {
           created_at: string
-          data_id: string
-          data_questionText: string
-          data_questionType: string
           id: string
+          questionText: string
+          questionType: string
           rev: number
           submission_id: string
-          user_id: string
         }
         Insert: {
           created_at?: string
-          data_id: string
-          data_questionText: string
-          data_questionType: string
-          id?: string
+          id: string
+          questionText: string
+          questionType: string
           rev: number
           submission_id: string
-          user_id?: string
         }
         Update: {
           created_at?: string
-          data_id?: string
-          data_questionText?: string
-          data_questionType?: string
           id?: string
+          questionText?: string
+          questionType?: string
           rev?: number
           submission_id?: string
-          user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "questions_data_id_fkey"
-            columns: ["data_id"]
-            isOneToOne: false
-            referencedRelation: "answers"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "questions_submission_id_fkey"
             columns: ["submission_id"]
@@ -185,7 +180,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          id?: string
+          id: string
           labeling_task_id: string
           queue_id: string
           updated_at?: string | null

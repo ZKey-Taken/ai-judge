@@ -1,6 +1,28 @@
 import {type ChangeEvent, type FC, useRef, useState} from "react";
 import {SendHorizonal, Upload} from "lucide-react";
 import "./HomePage.css";
+import JSON5 from 'json5';
+
+type Appendix = {
+    id: string;
+    queueId: string;
+    labelingTaskId: string;
+    createdAt?: number;
+    questions: {
+        rev: number;
+        data: {
+            id: string;
+            questionType: "single_choice_with_reasoning";
+            questionText: string;
+        };
+    }[];
+    answers: {
+        [questionId: string]: {
+            choice: string;
+            reasoning: string;
+        };
+    };
+};
 
 const HomePage: FC = () => {
     const buttonSize: number = 25;
@@ -22,17 +44,10 @@ const HomePage: FC = () => {
         if (!file) return;
 
         try {
-            let text = await file.text();
-
-            // Clean up common issues
-            text = text.replace(/^\uFEFF/, '');
-            text = text.replace(/\u00A0/g, ' ');
-            text = text.replace(/[\u2000-\u200B\u2028\u2029]/g, ' ');
-            text = text.trim();
-
-            const json = JSON.parse(text);
+            const text = await file.text();
+            const json = JSON5.parse(text);
             const jsonString: string = JSON.stringify(json, null, 2);
-            setJsonPreview(jsonString)
+            setJsonPreview(jsonString);
 
             requestAnimationFrame(() => {
                 if (textareaRef.current) {
@@ -40,15 +55,22 @@ const HomePage: FC = () => {
                     textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
                 }
             });
-        } catch {
-            // Not JSON file, we save for other uses
+        } catch (error) {
+            console.error('Invalid JSON:', error);
+            setJsonPreview("Invalid JSON file");
+            // Not JSON file, bonus: we save for LLM uses
             return;
         }
     };
 
 
     const handleSubmit = () => {
-        console.log("Submit JSON:", jsonPreview);
+        try {
+            const parsedAppendix: Appendix[] = JSON5.parse(jsonPreview);
+            console.log(parsedAppendix);
+        } catch {
+            /* empty */
+        }
     };
 
     return (
