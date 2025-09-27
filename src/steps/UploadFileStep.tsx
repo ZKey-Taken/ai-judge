@@ -2,7 +2,8 @@ import {SendHorizonal, Upload} from "lucide-react";
 import {type ChangeEvent, type FC, useRef, useState} from "react";
 import JSON5 from "json5";
 import type {Appendix, UploadFileStepProps} from "../lib/Types.ts";
-import "../pages/HomePage.css";
+import "../steps/UploadFileStep.css";
+import {supabase} from "../lib/Supabase.ts";
 
 const UploadFileStep: FC<UploadFileStepProps> = ({onNextStep}) => {
     const buttonSize: number = 25;
@@ -38,14 +39,42 @@ const UploadFileStep: FC<UploadFileStepProps> = ({onNextStep}) => {
             console.error('Invalid JSON:', error);
             setJsonPreview("Invalid JSON file");
             // Not JSON file, bonus: we save for LLM uses
-            return;
         }
     };
 
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         try {
             const parsedAppendix: Appendix[] = JSON5.parse(jsonPreview);
+
+            for (const appendix of parsedAppendix) {
+                await supabase.from('submissions').insert({
+                    id: appendix.id,
+                    queue_id: appendix.queueId,
+                    labeling_task_id: appendix.labelingTaskId,
+                    created_at: new Date(appendix.createdAt).toISOString(),
+                });
+
+                for (const q of appendix.questions) {
+                    await supabase.from('questions').insert({
+                        id: q.data.id,
+                        questionText: q.data.questionText,
+                        questionType: q.data.questionType,
+                        rev: q.rev,
+                        submission_id: appendix.id,
+                    });
+
+                    const ans = appendix.answers[q.data.id];
+                    if (ans) {
+                        await supabase.from('answers').insert({
+                            id: q.data.id,        // same as question ID
+                            choice: ans.choice,
+                            reasoning: ans.reasoning,
+                        });
+                    }
+                }
+            }
+
             onNextStep(parsedAppendix);
         } catch {
             /* empty */

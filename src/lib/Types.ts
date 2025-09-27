@@ -28,6 +28,11 @@ export type UploadFileStepProps = {
     onNextStep: (appendix: Appendix[]) => void;
 };
 
+export type AssignJudgesProps = {
+    appendix: Appendix[];
+    onNextStep: () => void;
+};
+
 // Others
 export type AuthContextType = {
     user: User | null;
@@ -39,7 +44,7 @@ export type Appendix = {
     id: string;
     queueId: string;
     labelingTaskId: string;
-    createdAt?: number;
+    createdAt: number;
     questions: {
         rev: number;
         data: {
