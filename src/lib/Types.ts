@@ -67,3 +67,11 @@ export const Steps = {
 } as const;
 
 export type Steps = (typeof Steps)[keyof typeof Steps];
+
+export type SubmissionIdToQuestions = {
+    [submissionId: string]: Question[];
+};
+
+export type QuestionIdToAnswers = {
+    [questionId: string]: Answer[];
+}
