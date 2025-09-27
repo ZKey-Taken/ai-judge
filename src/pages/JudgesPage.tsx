@@ -1,17 +1,24 @@
-import {type FC, useEffect, useState} from "react";
+import {type FC, useState} from "react";
 import "./JudgePage.css";
 import {supabase} from "../lib/Supabase.ts";
 import {ConfirmationOverlay} from "../components/Overlay.tsx";
-import type {Judge, JudgePageProps} from "../lib/Types.ts";
+import type {JudgePageProps} from "../lib/Types.ts";
 import {Loader2} from "lucide-react";
 import {JudgeItem} from "../components/JudgeItem.tsx";
 import {AddJudgeOverlay} from "../components/AddJudgeOverlay.tsx";
+import {useFetchJudgesQuery} from "../queries/useFetchJudges.tsx";
+import {useQueryClient} from "@tanstack/react-query";
 
 const JudgePage: FC<JudgePageProps> = ({userId}) => {
-    const [judges, setJudges] = useState<Judge[]>([]);
-    const [loadingJudges, setLoadingJudges] = useState<boolean>(true);
-    const [overlayMessage, setOverlayMessage] = useState<string>("");
+    const queryClient = useQueryClient();
+    const {data: judges = [], isLoading: loadingJudges, error} = useFetchJudgesQuery(userId);
+
+    const [overlayMessage, setOverlayMessage] = useState<string>(error?.message || "");
     const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
+
+    const refetchJudges = async () => {
+        await queryClient.invalidateQueries({queryKey: ["judges", userId]});
+    }
 
     const toggleActive = async (id: string, current_is_active: boolean) => {
         try {
@@ -25,37 +32,11 @@ const JudgePage: FC<JudgePageProps> = ({userId}) => {
                 return;
             }
 
-            setJudges((prev) =>
-                prev.map((j) => (j.id === id ? {...j, is_active: !j.is_active} : j))
-            );
+            await refetchJudges();
         } catch (error) {
             setOverlayMessage("Failed to update judge:" + error);
         }
     };
-
-    useEffect(() => {
-        const fetchJudges = async () => {
-            try {
-                const {data, error} = await supabase
-                    .from("judges")
-                    .select("*")
-                    .eq("user_id", userId);
-
-                if (error) {
-                    setOverlayMessage("Failed to fetch judges: " + error.message);
-                    return;
-                }
-
-                setJudges(data || []);
-            } catch (error) {
-                setOverlayMessage("Failed to fetch judges: " + error);
-            } finally {
-                setLoadingJudges(false);
-            }
-        };
-
-        fetchJudges();
-    }, [userId]);
 
     return (
         <div className="judge-page">
@@ -92,11 +73,7 @@ const JudgePage: FC<JudgePageProps> = ({userId}) => {
                                 <JudgeItem
                                     judge={j}
                                     userId={userId}
-                                    onUpdated={(updated) =>
-                                        setJudges((prev) =>
-                                            prev.map((jj) => (jj.id === updated.id ? updated : jj))
-                                        )
-                                    }
+                                    onUpdated={refetchJudges}
                                     onError={(msg) => setOverlayMessage(msg)}
                                     onToggleActive={(id, current) => toggleActive(id, current)}
                                 />
@@ -110,8 +87,8 @@ const JudgePage: FC<JudgePageProps> = ({userId}) => {
             {isCreateOpen && (
                 <AddJudgeOverlay
                     onClose={() => setIsCreateOpen(false)}
-                    onCreated={(created) => {
-                        setJudges((prev) => [...prev, created]);
+                    onCreated={async () => {
+                        await refetchJudges();
                         setIsCreateOpen(false);
                     }}
                     onError={(msg) => setOverlayMessage(msg)}

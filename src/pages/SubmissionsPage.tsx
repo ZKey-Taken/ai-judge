@@ -15,7 +15,6 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
 
     /*
     TODO:
-    - Show all submissions and their questions/answers.
     - Display all evaluation results (verdict + reasoning + judge) for each submission.
      */
 

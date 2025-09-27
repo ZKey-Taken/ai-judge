@@ -16,6 +16,9 @@ import JudgesPage from "./pages/JudgesPage.tsx";
 import {AuthProvider} from "./lib/AuthProvider.tsx";
 import {useAuth} from "./hooks/useAuth.ts";
 import {AuthForm} from "./auth/AuthForm.tsx";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 const Layout: FC<{ children: React.ReactNode }> = ({children}) => {
     const navigate: NavigateFunction = useNavigate();
@@ -88,11 +91,13 @@ const AppRoutes: FC = () => {
 
 const App: FC = () => {
     return (
-        <AuthProvider>
-            <BrowserRouter>
-                <AppRoutes/>
-            </BrowserRouter>
-        </AuthProvider>
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+                <BrowserRouter>
+                    <AppRoutes/>
+                </BrowserRouter>
+            </AuthProvider>
+        </QueryClientProvider>
     );
 };
 
