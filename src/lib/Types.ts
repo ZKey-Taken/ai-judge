@@ -4,12 +4,11 @@ import type {User} from "@supabase/supabase-js";
 // Databases
 export type Judge = Database['public']['Tables']['judges']['Row'];
 export type JudgeInsert = Database["public"]["Tables"]["judges"]["Insert"];
+export type Submission = Database['public']['Tables']['submissions']['Row'];
+export type Question = Database['public']['Tables']['questions']['Row'];
+export type Answer = Database['public']['Tables']['answers']['Row'];
 
 // Props
-export type HomePageProps = {
-    userId: string;
-};
-
 export type SubmissionsPageProps = {
     userId: string;
 };

@@ -42,7 +42,6 @@ const UploadFileStep: FC<UploadFileStepProps> = ({onNextStep}) => {
         }
     };
 
-
     const handleSubmit = async () => {
         try {
             const parsedAppendix: Appendix[] = JSON5.parse(jsonPreview);
