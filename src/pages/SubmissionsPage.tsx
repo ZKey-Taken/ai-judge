@@ -1,4 +1,4 @@
-import type {Question, QuestionIdToAnswers, SubmissionIdToQuestions, SubmissionsPageProps} from "../lib/Types.ts";
+import type {QuestionIdToAnswers, SubmissionIdToQuestions, SubmissionsPageProps} from "../lib/Types.ts";
 import {type FC, useState} from "react";
 import "./SubmissionsPage.css";
 import {ConfirmationOverlay} from "../components/Overlay.tsx";
@@ -18,11 +18,10 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
         data: questionsData,
         isLoading: loadingQuestions,
         error: questionsError
-    } = useFetchQuestionsQuery(submissions);
-    const questions: Question[] | undefined = questionsData?.questions;
+    } = useFetchQuestionsQuery(userId);
     const submissionsToQuestions: SubmissionIdToQuestions | undefined = questionsData?.submissionsToQuestions;
 
-    const {data: answersData, isLoading: loadingAnswers, error: answersError} = useFetchAnswersQuery(questions);
+    const {data: answersData, isLoading: loadingAnswers, error: answersError} = useFetchAnswersQuery(userId);
     const questionsToAnswers: QuestionIdToAnswers | undefined = answersData?.questionsToAnswers;
 
     const [overlayMessage, setOverlayMessage] = useState<string>(

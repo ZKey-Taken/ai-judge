@@ -1,20 +1,20 @@
 import {useQuery, type UseQueryResult} from "@tanstack/react-query";
 import {supabase} from "../lib/Supabase.ts";
-import type {Question, Submission, SubmissionIdToQuestions} from "../lib/Types.ts";
+import type {Question, SubmissionIdToQuestions} from "../lib/Types.ts";
 
 type QuestionsQueryResult = {
     questions: Question[];
     submissionsToQuestions: SubmissionIdToQuestions;
 };
 
-const useFetchQuestionsQuery = (submissions: Submission[] | undefined): UseQueryResult<QuestionsQueryResult, Error> => {
+const useFetchQuestionsQuery = (userId: string): UseQueryResult<QuestionsQueryResult, Error> => {
     return useQuery({
         queryKey: ["questions"],
         queryFn: async () => {
             const {data, error} = await supabase
                 .from('questions')
                 .select('*')
-                .in('submission_id', (submissions ?? []).map(s => s.id));
+                .eq('user_id', userId);
 
             if (error) {
                 throw new Error(error.message);
@@ -22,7 +22,6 @@ const useFetchQuestionsQuery = (submissions: Submission[] | undefined): UseQuery
 
             return data || [];
         },
-        enabled: submissions && submissions.length > 0,
         select: (questionsData: Question[]): QuestionsQueryResult => {
             const submissionsToQuestions: SubmissionIdToQuestions = {};
 

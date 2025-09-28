@@ -45,18 +45,21 @@ export type Database = {
           created_at: string
           id: string
           reasoning: string
+          user_id: string | null
         }
         Insert: {
           choice: string
           created_at?: string
           id: string
           reasoning: string
+          user_id?: string | null
         }
         Update: {
           choice?: string
           created_at?: string
           id?: string
           reasoning?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -142,6 +145,7 @@ export type Database = {
           questionType: string
           rev: number
           submission_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -150,6 +154,7 @@ export type Database = {
           questionType: string
           rev: number
           submission_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -158,6 +163,7 @@ export type Database = {
           questionType?: string
           rev?: number
           submission_id?: string
+          user_id?: string
         }
         Relationships: [
           {

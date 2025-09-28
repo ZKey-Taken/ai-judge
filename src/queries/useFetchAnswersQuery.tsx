@@ -1,5 +1,5 @@
 import {useQuery, type UseQueryResult} from "@tanstack/react-query";
-import type {Answer, Question, QuestionIdToAnswers} from "../lib/Types.ts";
+import type {Answer, QuestionIdToAnswers} from "../lib/Types.ts";
 import {supabase} from "../lib/Supabase.ts";
 
 type AnswersQueryResult = {
@@ -7,14 +7,14 @@ type AnswersQueryResult = {
     questionsToAnswers: QuestionIdToAnswers;
 };
 
-const useFetchAnswersQuery = (questions: Question[] | undefined): UseQueryResult<AnswersQueryResult, Error> => {
+const useFetchAnswersQuery = (userId: string): UseQueryResult<AnswersQueryResult, Error> => {
     return useQuery({
         queryKey: ["answers"],
         queryFn: async () => {
             const {data, error} = await supabase
                 .from('answers')
                 .select('*')
-                .in('id', (questions ?? []).map(q => q.id));
+                .eq('user_id', userId);
 
             if (error) {
                 throw new Error(error.message);
@@ -22,7 +22,6 @@ const useFetchAnswersQuery = (questions: Question[] | undefined): UseQueryResult
 
             return data || [];
         },
-        enabled: questions && questions.length > 0,
         select: (answersData: Answer[]) => {
             const questionsToAnswers: QuestionIdToAnswers = {};
 
