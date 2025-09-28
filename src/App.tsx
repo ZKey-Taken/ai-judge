@@ -1,6 +1,6 @@
 import React, {type FC} from "react";
 import './App.css';
-import {FileText, Gavel, Home, LogOut} from 'lucide-react';
+import {FileText, Gavel, LogOut, Upload} from 'lucide-react';
 import {
     BrowserRouter,
     type Location,
@@ -35,7 +35,7 @@ const Layout: FC<{ children: React.ReactNode }> = ({children}) => {
                     disabled={location.pathname === '/'}
                     onClick={() => navigate('/')}
                 >
-                    <Home size={buttonSize}/>
+                    <Upload size={buttonSize}/>
                 </button>
 
                 <button

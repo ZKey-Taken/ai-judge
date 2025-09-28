@@ -5,6 +5,7 @@ import type {AnswerInsert, Appendix, QuestionInsert, SubmissionInsert, UploadFil
 import "../steps/UploadFileStep.css";
 import {supabase} from "../lib/Supabase.ts";
 import {ConfirmationOverlay} from "../components/Overlay.tsx";
+import {convertToString, rollbackSubmissions} from "../lib/Helper.ts";
 
 const UploadFileStep: FC<UploadFileStepProps> = ({onNextStep}) => {
     const buttonSize: number = 25;
@@ -45,6 +46,8 @@ const UploadFileStep: FC<UploadFileStepProps> = ({onNextStep}) => {
     };
 
     const handleSubmit = async () => {
+        let insertedSubIds: string[] = []; // In case we need to roll back submissions from DB
+
         try {
             const parsedAppendix: Appendix[] = JSON5.parse(jsonPreview);
 
@@ -55,15 +58,6 @@ const UploadFileStep: FC<UploadFileStepProps> = ({onNextStep}) => {
                 labeling_task_id: app.labelingTaskId,
                 created_at: new Date(app.createdAt).toISOString(),
             }));
-
-            const {error: submissionError} = await supabase
-                .from('submissions')
-                .insert(submissionsData);
-
-            if (submissionError) {
-                setOverlayMessage(submissionError.message);
-                return;
-            }
 
             // Batch insert questions and answers
             const questionsData: QuestionInsert[] = [];
@@ -77,19 +71,30 @@ const UploadFileStep: FC<UploadFileStepProps> = ({onNextStep}) => {
                         questionType: q.data.questionType,
                         rev: q.rev,
                         submission_id: appendix.id,
-                        created_at: new Date().toISOString(),
                     });
 
                     const ans = appendix.answers[q.data.id];
                     if (ans) {
+                        console.log("ans key exists:", ans);
                         answersData.push({
                             id: q.data.id, // same as question ID
-                            choice: ans.choice,
+                            choice: convertToString(ans.choice), // convertToString in chance choices is an array of strings
                             reasoning: ans.reasoning,
-                            created_at: new Date().toISOString(),
                         });
                     }
                 }
+            }
+
+            insertedSubIds = submissionsData.map(submission => submission.id);
+
+            // Insert submissions, questions, and answers into Supabase
+            const {error: submissionError} = await supabase
+                .from('submissions')
+                .insert(submissionsData);
+
+            if (submissionError) {
+                setOverlayMessage(submissionError.message);
+                return;
             }
 
             if (questionsData.length > 0) {
@@ -98,6 +103,7 @@ const UploadFileStep: FC<UploadFileStepProps> = ({onNextStep}) => {
                     .insert(questionsData);
 
                 if (questionsError) {
+                    await rollbackSubmissions(insertedSubIds);
                     setOverlayMessage(questionsError.message);
                     return;
                 }
@@ -109,14 +115,16 @@ const UploadFileStep: FC<UploadFileStepProps> = ({onNextStep}) => {
                     .insert(answersData);
 
                 if (answersError) {
+                    await rollbackSubmissions(insertedSubIds);
                     setOverlayMessage(answersError.message);
                     return;
                 }
             }
 
             onNextStep(parsedAppendix);
-        } catch {
-            /* empty */
+        } catch (error) {
+            await rollbackSubmissions(insertedSubIds);
+            setOverlayMessage(convertToString(error));
         }
     };
 

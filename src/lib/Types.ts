@@ -67,7 +67,7 @@ export type Appendix = {
     }[];
     answers: {
         [questionId: string]: {
-            choice: string;
+            choice: string | string[];
             reasoning: string;
         };
     };
