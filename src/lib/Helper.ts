@@ -2,13 +2,8 @@ import {supabase} from "./Supabase.ts";
 
 // Converts array of string into a string, or if value is null/undefined returns empty string, otherwise string.
 export const convertToString = (value: unknown): string => {
-    console.log("value:", value);
-    console.log("typeof value:", typeof value);
-
-    if (Array.isArray(value)) {
-        return value.join(', ');
-    } else if (value === null || value === undefined) return '';
-
+    if (value === null || value === undefined) return '';
+    else if (Array.isArray(value)) return value.join(', ');
     return String(value);
 }
 

@@ -67,7 +67,8 @@ export type Appendix = {
     }[];
     answers: {
         [questionId: string]: {
-            choice: string | string[];
+            choice: string | string[]; // string[] is a fallback, unsure what the actual type is
+            choices?: string[];
             reasoning: string;
         };
     };

@@ -75,10 +75,10 @@ const UploadFileStep: FC<UploadFileStepProps> = ({onNextStep}) => {
 
                     const ans = appendix.answers[q.data.id];
                     if (ans) {
-                        console.log("ans key exists:", ans);
+                        const choice: string = convertToString(ans.choice || ans.choices);
                         answersData.push({
                             id: q.data.id, // same as question ID
-                            choice: convertToString(ans.choice), // convertToString in chance choices is an array of strings
+                            choice: choice,
                             reasoning: ans.reasoning,
                         });
                     }
