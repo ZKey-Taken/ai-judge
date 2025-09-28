@@ -14,6 +14,9 @@ export type QuestionInsert = Database["public"]["Tables"]["questions"]["Insert"]
 export type Answer = Database['public']['Tables']['answers']['Row'];
 export type AnswerInsert = Database["public"]["Tables"]["answers"]["Insert"];
 
+export type QuestionJudges = Database['public']['Tables']['question_judges']['Row'];
+export type QuestionJudgesInsert = Database['public']['Tables']['question_judges']['Insert'];
+
 
 // Props
 export type HomePageProps = {
@@ -91,6 +94,16 @@ export type QuestionIdToAnswers = {
 }
 
 export type JudgeAssignments = {
-    // For assigning judges IDs to a question ID
+    // Maps question ID to assigned Judge objects (from DB)
+    [questionId: string]: Judge[];
+};
+
+export type AssignedJudgesId = {
+    // Maps question ID to assigned Judge ID
     [questionId: string]: string[];
+};
+
+export type QuestionWithJudge =
+    QuestionJudges & {
+    judges: Judge;
 };

@@ -6,8 +6,10 @@ import {Loader2} from "lucide-react";
 import {useFetchSubmissionsQuery} from "../queries/useFetchSubmissionsQuery.tsx";
 import {useFetchQuestionsQuery} from "../queries/useFetchQuestionsQuery.tsx";
 import {useFetchAnswersQuery} from "../queries/useFetchAnswersQuery.tsx";
+import {useFetchQuestionJudgesQuery} from "../queries/useFetchQuestionJudgesQuery.tsx";
 
 const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
+
     const {
         data: submissions,
         isLoading: loadingSubmissions,
@@ -24,9 +26,12 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
     const {data: answersData, isLoading: loadingAnswers, error: answersError} = useFetchAnswersQuery(userId);
     const questionsToAnswers: QuestionIdToAnswers | undefined = answersData?.questionsToAnswers;
 
-    const [overlayMessage, setOverlayMessage] = useState<string>(
-        submissionsError?.message || questionsError?.message || answersError?.message || ""
-    );
+    const {data: questionToAssignedJudges, isLoading: loadingQj, error: qjError} = useFetchQuestionJudgesQuery(userId);
+
+    const [overlayMessage, setOverlayMessage] = useState<string>("");
+
+    const anyLoading = loadingSubmissions || loadingQuestions || loadingAnswers || loadingQj;
+    const currentErrorMessage = overlayMessage || submissionsError?.message || questionsError?.message || answersError?.message || qjError?.message || "";
 
     /*
     TODO:
@@ -36,12 +41,12 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
     return (
         <div className="submissions-page-container">
             <div className="submissions-outer-div">
-                {(loadingSubmissions || loadingQuestions || loadingAnswers) ? (
+                {anyLoading ? (
                     <div className="loading-container">
                         <Loader2 className="spinner"/>
                         <p>Loading...</p>
                     </div>
-                ) : (!submissions || !submissionsToQuestions || !questionsToAnswers || submissions.length === 0) ? (
+                ) : (!submissions || !submissionsToQuestions || !questionsToAnswers || !questionToAssignedJudges || submissions.length === 0) ? (
                     <p className="empty-submissions">
                         No submission yet. Please upload file to get submission.
                     </p>
@@ -59,6 +64,7 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
 
                                 {questions.map((q) => {
                                     const answers = questionsToAnswers[q.id] || [];
+                                    const assigned = questionToAssignedJudges[q.id] || [];
 
                                     return (
                                         <div key={q.id} className="question-div">
@@ -69,6 +75,15 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
                                                 Type:</strong> {q.questionType}
                                             </p>
                                             <p className="question-rev"><strong>Rev:</strong> {q.rev}</p>
+
+                                            {/* Assigned judges display only */}
+                                            {assigned.length > 0 ? (
+                                                <p className="question-assigned-judges">
+                                                    <strong>Assigned Judges:</strong> {assigned.map(j => j.name).join(", ")}
+                                                </p>
+                                            ) : (
+                                                <p className="question-assigned-judges"><strong>Assigned Judges:</strong> None</p>
+                                            )}
 
                                             {answers.length > 0 ? (
                                                 <div className="answers-div">
@@ -96,10 +111,10 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
                 )}
             </div>
 
-            {overlayMessage &&
+            {(currentErrorMessage) &&
                 <ConfirmationOverlay
                     title="Unable to obtain submissions"
-                    message={overlayMessage}
+                    message={currentErrorMessage}
                     onConfirm={() => setOverlayMessage("")}
                 />
             }

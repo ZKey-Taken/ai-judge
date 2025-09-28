@@ -1,50 +1,128 @@
 import {type FC, useState} from "react";
-import type {AssignJudgesProps, JudgeAssignments} from "../lib/Types.ts";
+import type {
+    AnswerInsert,
+    AssignedJudgesId,
+    AssignJudgesProps,
+    QuestionInsert,
+    SubmissionInsert
+} from "../lib/Types.ts";
 import "./AssignJudgesStep.css";
 import {useFetchJudgesQuery} from "../queries/useFetchJudgesQuery.tsx";
 import {supabase} from "../lib/Supabase.ts";
 import {ConfirmationOverlay} from "../components/Overlay.tsx";
 import {ArrowRight} from "lucide-react";
+import {convertToString, rollbackSubmissions} from "../lib/Helper.ts";
 
 const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep}) => {
     const {data: judges = [], isLoading: loadingJudges, error} = useFetchJudgesQuery(userId);
 
-    const [assignments, setAssignments] = useState<JudgeAssignments>({});
+    const [assignments, setAssignments] = useState<AssignedJudgesId>({});
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [isSaved, setIsSaved] = useState<boolean>(false);
     const [overlayMessage, setOverlayMessage] = useState<string>("");
 
+    // Derived: ensure at least one judge assigned per question before allowing next
+    const allQuestionIds: string[] = appendix.flatMap(app => app.questions.map(q => q.data.id));
+    const allQuestionsHaveJudge: boolean = allQuestionIds.length > 0 && allQuestionIds.every(qid => (assignments[qid]?.length || 0) > 0);
+
     const handleToggleJudge = (questionId: string, judgeId: string) => {
-        setAssignments((prev) => {
-            const current = prev[questionId] || [];
+        setAssignments((prevState) => {
+            const current = prevState[questionId] || [];
             const updated = current.includes(judgeId)
                 ? current.filter((id) => id !== judgeId) // remove if already selected
                 : [...current, judgeId]; // add otherwise
-            return {...prev, [questionId]: updated};
+            return {...prevState, [questionId]: updated};
         });
     };
 
-    const handleSave = async () => {
+    const handleSave = async (): Promise<boolean> => {
+        let insertedSubIds: string[] = [];
         try {
             setIsSaving(true);
-            // Build rows like: [{ question_id, judge_id }, ...]
-            const rows = Object.entries(assignments).flatMap(([question_id, judgeIds]) =>
+
+            // 1) Build batch payloads for submissions, questions, answers from appendix
+            const submissionsData: SubmissionInsert[] = appendix.map(app => ({
+                id: app.id,
+                queue_id: app.queueId,
+                labeling_task_id: app.labelingTaskId,
+                created_at: new Date(app.createdAt).toISOString(),
+            }));
+
+            const questionsData: QuestionInsert[] = [];
+            const answersData: AnswerInsert[] = [];
+
+            for (const app of appendix) {
+                for (const q of app.questions) {
+                    questionsData.push({
+                        id: q.data.id,
+                        questionText: q.data.questionText,
+                        questionType: q.data.questionType,
+                        rev: q.rev,
+                        submission_id: app.id,
+                    });
+
+                    const ans = app.answers[q.data.id];
+                    if (ans) {
+                        const choice: string = convertToString(ans.choice || ans.choices);
+                        answersData.push({
+                            id: q.data.id,
+                            choice: choice,
+                            reasoning: ans.reasoning,
+                        });
+                    }
+                }
+            }
+
+            insertedSubIds = submissionsData.map(s => s.id);
+
+            // 2) Insert submissions
+            const {error: submissionError} = await supabase.from('submissions').insert(submissionsData);
+            if (submissionError) {
+                setOverlayMessage(submissionError.message);
+                return false;
+            }
+
+            // 3) Insert questions
+            if (questionsData.length > 0) {
+                const {error: questionsError} = await supabase.from('questions').insert(questionsData);
+                if (questionsError) {
+                    await rollbackSubmissions(insertedSubIds);
+                    setOverlayMessage(questionsError.message);
+                    return false;
+                }
+            }
+
+            // 4) Insert answers
+            if (answersData.length > 0) {
+                const {error: answersError} = await supabase.from('answers').insert(answersData);
+                if (answersError) {
+                    await rollbackSubmissions(insertedSubIds);
+                    setOverlayMessage(answersError.message);
+                    return false;
+                }
+            }
+
+            // 5) Insert question_judges from selection
+            const qjRows = Object.entries(assignments).flatMap(([question_id, judgeIds]) =>
                 (judgeIds || []).map((judge_id) => ({question_id, judge_id}))
             );
 
-            if (rows.length > 0) {
-                const {error} = await supabase.from("question_judges").insert(rows);
-
-                if (error) {
-                    setOverlayMessage(error.message)
-                    return;
+            if (qjRows.length > 0) {
+                const {error: qjError} = await supabase.from('question_judges').insert(qjRows);
+                if (qjError) {
+                    await rollbackSubmissions(insertedSubIds);
+                    setOverlayMessage(qjError.message);
+                    return false;
                 }
             }
-        } catch {
-            /**/
+
+            setIsSaved(true);
+            return true;
+        } catch (e) {
+            setOverlayMessage(convertToString(e));
+            return false;
         } finally {
             setIsSaving(false);
-            setIsSaved(true);
         }
     }
 
@@ -74,21 +152,23 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
                                 <p>Assign Judges:</p>
                                 {judges && judges.length === 0 ?
                                     <p className="assign-judges-empty-judges">
-                                        No judges available, you can goto Judges Page to make them, leaving this page
-                                        will save this submission in submissions page.
+                                        No judges available. You can go to the Judges page to create them. Assign at
+                                        least one judge per question to continue.
                                     </p>
                                     :
-                                    judges.map((judge) => (
-                                        <label key={judge.id} className="assign-judges-label">
-                                            <input
-                                                type="checkbox"
-                                                className="assign-judges-input-checkbox"
-                                                checked={assignments[q.data.id]?.includes(judge.id) || false}
-                                                onChange={() => handleToggleJudge(q.data.id, judge.id)}
-                                            />
-                                            <p className="assign-judges-judge-name">{judge.name}</p>
-                                        </label>
-                                    ))}
+                                    judges
+                                        .filter(judge => judge.is_active)
+                                        .map((judge) => (
+                                            <label key={judge.id} className="assign-judges-label">
+                                                <input
+                                                    type="checkbox"
+                                                    className="assign-judges-input-checkbox"
+                                                    checked={assignments[q.data.id]?.includes(judge.id) || false}
+                                                    onChange={() => handleToggleJudge(q.data.id, judge.id)}
+                                                />
+                                                <p className="assign-judges-judge-name">{judge.name}</p>
+                                            </label>
+                                        ))}
                             </div>
                         </div>
                     ))}
@@ -99,10 +179,18 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
                 <button
                     className="assign-judges-submit"
                     onClick={async () => {
-                        if (!isSaved) await handleSave();
-                        onNextStep();
+                        if (!allQuestionsHaveJudge) {
+                            setOverlayMessage("Please assign at least one judge to every question before continuing.");
+                            return;
+                        }
+                        if (isSaved) {
+                            onNextStep();
+                            return;
+                        }
+                        const ok = await handleSave();
+                        if (ok) onNextStep();
                     }}
-                    disabled={isSaving}
+                    disabled={isSaving || !allQuestionsHaveJudge}
                 >
                     {isSaving ? "Saving..." : <ArrowRight size={18}/>}
                 </button>
