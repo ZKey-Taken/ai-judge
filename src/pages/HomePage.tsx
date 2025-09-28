@@ -6,7 +6,19 @@ import AssignJudgesStep from "../steps/AssignJudgesStep.tsx";
 
 const HomePage: FC<HomePageProps> = ({userId}) => {
     const [currentStep, setCurrentStep] = useState<Steps>(Steps.UploadFile);
+    const [evaluationComplete, setEvaluationComplete] = useState<boolean>(false);
     const [appendix, setAppendix] = useState<Appendix[]>([]);
+
+    const runEvaluation = () => {
+        try {
+            setEvaluationComplete(false);
+
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setEvaluationComplete(true);
+        }
+    }
 
     return (
         <div className="home-page">
@@ -23,9 +35,17 @@ const HomePage: FC<HomePageProps> = ({userId}) => {
                     appendix={appendix}
                     userId={userId}
                     onNextStep={() => {
+                        runEvaluation();
                         setCurrentStep(Steps.RunEvaluations);
                     }}
                 />
+            }
+            {currentStep === Steps.RunEvaluations &&
+                (evaluationComplete ?
+                        <p>Evaluation Complete</p>
+                        :
+                        <p>Running Evaluation ...</p>
+                )
             }
         </div>
     );

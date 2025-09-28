@@ -21,7 +21,7 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
     const [isSaved, setIsSaved] = useState<boolean>(false);
     const [overlayMessage, setOverlayMessage] = useState<string>("");
 
-    // Derived: ensure at least one judge assigned per question before allowing next
+    // Derived: ensure at least one judge assigned per question before allowing the next
     const allQuestionIds: string[] = appendix.flatMap(app => app.questions.map(q => q.data.id));
     const allQuestionsHaveJudge: boolean = allQuestionIds.length > 0 && allQuestionIds.every(qid => (assignments[qid]?.length || 0) > 0);
 
@@ -78,7 +78,12 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
             // 2) Insert submissions
             const {error: submissionError} = await supabase.from('submissions').insert(submissionsData);
             if (submissionError) {
-                setOverlayMessage(submissionError.message);
+                if (submissionError.message === "duplicate key value violates unique constraint \"submissions_id_key\"") {
+                    setOverlayMessage("You've already uploaded this submission before!")
+                } else {
+                    setOverlayMessage(submissionError.message);
+                }
+
                 return false;
             }
 
@@ -124,6 +129,18 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
         } finally {
             setIsSaving(false);
         }
+    }
+
+    const handleNextStep = async () => {
+        if (!allQuestionsHaveJudge) {
+            setOverlayMessage("Please assign at least one judge to every question before continuing.");
+            return;
+        } else if (isSaved) {
+            onNextStep();
+            return;
+        }
+        const ok = await handleSave();
+        if (ok) onNextStep();
     }
 
     if (loadingJudges) return <p>Loading judges...</p>;
@@ -178,19 +195,8 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
             <div className="assign-judges-actions">
                 <button
                     className="assign-judges-submit"
-                    onClick={async () => {
-                        if (!allQuestionsHaveJudge) {
-                            setOverlayMessage("Please assign at least one judge to every question before continuing.");
-                            return;
-                        }
-                        if (isSaved) {
-                            onNextStep();
-                            return;
-                        }
-                        const ok = await handleSave();
-                        if (ok) onNextStep();
-                    }}
-                    disabled={isSaving || !allQuestionsHaveJudge}
+                    onClick={handleNextStep}
+                    disabled={isSaving}
                 >
                     {isSaving ? "Saving..." : <ArrowRight size={18}/>}
                 </button>
