@@ -72,17 +72,23 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
 
                             <div className="judges-selector">
                                 <p>Assign Judges:</p>
-                                {judges.map((judge) => (
-                                    <label key={judge.id} className="assign-judges-label">
-                                        <input
-                                            type="checkbox"
-                                            className="assign-judges-input-checkbox"
-                                            checked={assignments[q.data.id]?.includes(judge.id) || false}
-                                            onChange={() => handleToggleJudge(q.data.id, judge.id)}
-                                        />
-                                        <p className="assign-judges-judge-name">{judge.name}</p>
-                                    </label>
-                                ))}
+                                {judges && judges.length === 0 ?
+                                    <p className="assign-judges-empty-judges">
+                                        No judges available, you can goto Judges Page to make them, leaving this page
+                                        will save this submission in submissions page.
+                                    </p>
+                                    :
+                                    judges.map((judge) => (
+                                        <label key={judge.id} className="assign-judges-label">
+                                            <input
+                                                type="checkbox"
+                                                className="assign-judges-input-checkbox"
+                                                checked={assignments[q.data.id]?.includes(judge.id) || false}
+                                                onChange={() => handleToggleJudge(q.data.id, judge.id)}
+                                            />
+                                            <p className="assign-judges-judge-name">{judge.name}</p>
+                                        </label>
+                                    ))}
                             </div>
                         </div>
                     ))}

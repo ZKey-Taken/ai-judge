@@ -82,6 +82,10 @@
     gap: 0.5rem;
 }
 
+.assign-judges-empty-judges { /* Same as JudgesPage.css */
+    color: #ff7d7d;
+}
+
 .assign-judges-submit:hover {
     background: #1e4ed8;
 }

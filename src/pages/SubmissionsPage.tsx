@@ -104,10 +104,11 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
                     :
                     submissions.map((s) => {
                         const questions = submissionsToQuestions[s.id] || [];
+                        const createdAtDate: Date = new Date(s.created_at);
 
                         return (
                             <div key={s.id} className="submission-div">
-                                <h1>Submissions</h1>
+                                <h1>Submission created at {createdAtDate.getTime()}</h1>
                                 <p className="submission-labeling-task-id"><strong>Labeling Task
                                     ID:</strong> {s.labeling_task_id}</p>
                                 <p className="submission-queue-id"><strong>Queue ID:</strong> {s.queue_id}</p>
