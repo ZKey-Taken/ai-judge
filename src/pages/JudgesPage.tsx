@@ -80,7 +80,6 @@ const JudgePage: FC<JudgePageProps> = ({userId}) => {
                             </li>
                         ))}
                     </ul>
-
                 )}
             </div>
 

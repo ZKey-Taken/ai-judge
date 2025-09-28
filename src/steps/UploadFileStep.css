@@ -25,10 +25,10 @@
     border: none;
     outline: none;
     font-size: 16px;
-    resize: none;
     overflow: auto;
     line-height: 1.5;
     box-sizing: border-box;
+    min-height: 45px;
     max-height: 600px;
 }
 

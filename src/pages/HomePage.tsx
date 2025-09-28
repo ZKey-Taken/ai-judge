@@ -1,10 +1,10 @@
 import {type FC, useState} from "react";
 import "./HomePage.css";
-import {type Appendix, Steps} from "../lib/Types.ts";
+import {type Appendix, type HomePageProps, Steps} from "../lib/Types.ts";
 import UploadFileStep from "../steps/UploadFileStep.tsx";
 import AssignJudgesStep from "../steps/AssignJudgesStep.tsx";
 
-const HomePage: FC = () => {
+const HomePage: FC<HomePageProps> = ({userId}) => {
     const [currentStep, setCurrentStep] = useState<Steps>(Steps.UploadFile);
     const [appendix, setAppendix] = useState<Appendix[]>([]);
 
@@ -21,6 +21,7 @@ const HomePage: FC = () => {
             {currentStep === Steps.AssignJudges &&
                 <AssignJudgesStep
                     appendix={appendix}
+                    userId={userId}
                     onNextStep={() => {
                         setCurrentStep(Steps.RunEvaluations);
                     }}

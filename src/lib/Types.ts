@@ -9,6 +9,10 @@ export type Question = Database['public']['Tables']['questions']['Row'];
 export type Answer = Database['public']['Tables']['answers']['Row'];
 
 // Props
+export type HomePageProps = {
+    userId: string;
+};
+
 export type SubmissionsPageProps = {
     userId: string;
 };
@@ -29,6 +33,7 @@ export type UploadFileStepProps = {
 
 export type AssignJudgesProps = {
     appendix: Appendix[];
+    userId: string;
     onNextStep: () => void;
 };
 
@@ -48,7 +53,7 @@ export type Appendix = {
         rev: number;
         data: {
             id: string;
-            questionType: "single_choice_with_reasoning";
+            questionType: string;
             questionText: string;
         };
     }[];
@@ -75,3 +80,8 @@ export type SubmissionIdToQuestions = {
 export type QuestionIdToAnswers = {
     [questionId: string]: Answer[];
 }
+
+export type JudgeAssignments = {
+    // For assigning judges IDs to a question ID
+    [questionId: string]: string[];
+};
