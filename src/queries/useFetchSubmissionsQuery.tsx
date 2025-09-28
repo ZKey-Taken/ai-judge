@@ -1,15 +1,15 @@
 import {useQuery, type UseQueryResult} from "@tanstack/react-query";
 import {supabase} from "../lib/Supabase.ts";
-import type {Judge} from "../lib/Types.ts";
+import type {Submission} from "../lib/Types.ts";
 
-export function useFetchJudgesQuery(userId: string): UseQueryResult<Judge[], Error> {
+const useFetchSubmissionsQuery = (userId: string): UseQueryResult<Submission[], Error> => {
     return useQuery({
-        queryKey: ["judges", userId],
+        queryKey: ["submissions"],
         queryFn: async () => {
             const {data, error} = await supabase
-                .from("judges")
-                .select("*")
-                .eq("user_id", userId);
+                .from('submissions')
+                .select('*')
+                .eq('user_id', userId);
 
             if (error) {
                 throw new Error(error.message);
@@ -19,3 +19,5 @@ export function useFetchJudgesQuery(userId: string): UseQueryResult<Judge[], Err
         },
     });
 }
+
+export {useFetchSubmissionsQuery};

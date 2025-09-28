@@ -1,7 +1,7 @@
 import {type FC, useState} from "react";
 import type {AssignJudgesProps, JudgeAssignments} from "../lib/Types.ts";
 import "./AssignJudgesStep.css";
-import {useFetchJudgesQuery} from "../queries/useFetchJudges.tsx";
+import {useFetchJudgesQuery} from "../queries/useFetchJudgesQuery.tsx";
 import {supabase} from "../lib/Supabase.ts";
 import {ConfirmationOverlay} from "../components/Overlay.tsx";
 import {ArrowRight} from "lucide-react";

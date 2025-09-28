@@ -6,7 +6,7 @@ import type {JudgePageProps} from "../lib/Types.ts";
 import {Loader2} from "lucide-react";
 import {JudgeItem} from "../components/JudgeItem.tsx";
 import {AddJudgeOverlay} from "../components/AddJudgeOverlay.tsx";
-import {useFetchJudgesQuery} from "../queries/useFetchJudges.tsx";
+import {useFetchJudgesQuery} from "../queries/useFetchJudgesQuery.tsx";
 import {useQueryClient} from "@tanstack/react-query";
 
 const JudgePage: FC<JudgePageProps> = ({userId}) => {
@@ -17,7 +17,7 @@ const JudgePage: FC<JudgePageProps> = ({userId}) => {
     const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
 
     const refetchJudges = async () => {
-        await queryClient.invalidateQueries({queryKey: ["judges", userId]});
+        await queryClient.invalidateQueries({queryKey: ["judges"]});
     }
 
     const toggleActive = async (id: string, current_is_active: boolean) => {
