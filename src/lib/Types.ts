@@ -4,9 +4,16 @@ import type {User} from "@supabase/supabase-js";
 // Databases
 export type Judge = Database['public']['Tables']['judges']['Row'];
 export type JudgeInsert = Database["public"]["Tables"]["judges"]["Insert"];
+
 export type Submission = Database['public']['Tables']['submissions']['Row'];
+export type SubmissionInsert = Database["public"]["Tables"]["submissions"]["Insert"];
+
 export type Question = Database['public']['Tables']['questions']['Row'];
+export type QuestionInsert = Database["public"]["Tables"]["questions"]["Insert"];
+
 export type Answer = Database['public']['Tables']['answers']['Row'];
+export type AnswerInsert = Database["public"]["Tables"]["answers"]["Insert"];
+
 
 // Props
 export type HomePageProps = {
@@ -36,6 +43,7 @@ export type AssignJudgesProps = {
     userId: string;
     onNextStep: () => void;
 };
+
 
 // Others
 export type AuthContextType = {

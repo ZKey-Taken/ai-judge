@@ -40,21 +40,18 @@ const JudgePage: FC<JudgePageProps> = ({userId}) => {
 
     return (
         <div className="judge-page">
-            <div className="judge-title-div">
-                <h1>Judge Page</h1>
-                <button
-                    type="button"
-                    className="add-judge-btn"
-                    onClick={() => setIsCreateOpen(true)}
-                >
-                    New Judge
-                </button>
-            </div>
-
-
-            {/* Judge List */}
             <div className="judge-list">
-                <h2>Existing Judges</h2>
+                <div className="judge-title-div">
+                    <h2>Existing Judges</h2>
+                    <button
+                        type="button"
+                        className="add-judge-btn"
+                        onClick={() => setIsCreateOpen(true)}
+                    >
+                        New Judge
+                    </button>
+                </div>
+
                 {loadingJudges &&
                     <div className="loading-container">
                         <Loader2 className="spinner"/>
@@ -63,7 +60,7 @@ const JudgePage: FC<JudgePageProps> = ({userId}) => {
                 }
 
                 {!loadingJudges && judges.length === 0 ? (
-                    <p className="empty">
+                    <p className="empty-judges">
                         No judges yet. Create one above.
                     </p>
                 ) : (

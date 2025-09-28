@@ -97,50 +97,57 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
                     </div>
                 }
 
-                {!loadingSubmissions && submissions.map((s) => {
-                    const questions = submissionsToQuestions[s.id] || [];
+                {!loadingSubmissions && submissions.length === 0 ?
+                    <p className="empty-submissions">
+                        No submission yet. Please upload file to get submission.
+                    </p>
+                    :
+                    submissions.map((s) => {
+                        const questions = submissionsToQuestions[s.id] || [];
 
-                    return (
-                        <div key={s.id} className="submission-div">
-                            <h1>Submissions</h1>
-                            <p className="submission-labeling-task-id"><strong>Labeling Task
-                                ID:</strong> {s.labeling_task_id}</p>
-                            <p className="submission-queue-id"><strong>Queue ID:</strong> {s.queue_id}</p>
+                        return (
+                            <div key={s.id} className="submission-div">
+                                <h1>Submissions</h1>
+                                <p className="submission-labeling-task-id"><strong>Labeling Task
+                                    ID:</strong> {s.labeling_task_id}</p>
+                                <p className="submission-queue-id"><strong>Queue ID:</strong> {s.queue_id}</p>
 
-                            {questions.map((q) => {
-                                const answers = questionsToAnswers[q.id] || [];
+                                {questions.map((q) => {
+                                    const answers = questionsToAnswers[q.id] || [];
 
-                                return (
-                                    <div key={q.id} className="question-div">
-                                        <p className="question-text"><strong>Question Text:</strong> {q.questionText}
-                                        </p>
-                                        <p className="question-type"><strong>Question Type:</strong> {q.questionType}
-                                        </p>
-                                        <p className="question-rev"><strong>Rev:</strong> {q.rev}</p>
+                                    return (
+                                        <div key={q.id} className="question-div">
+                                            <p className="question-text"><strong>Question
+                                                Text:</strong> {q.questionText}
+                                            </p>
+                                            <p className="question-type"><strong>Question
+                                                Type:</strong> {q.questionType}
+                                            </p>
+                                            <p className="question-rev"><strong>Rev:</strong> {q.rev}</p>
 
-                                        {answers.length > 0 ? (
-                                            <div className="answers-div">
-                                                <p className="answers-label"><strong>Answers:</strong></p>
-                                                <ul className="answers-ul">
-                                                    {answers.map((a) => (
-                                                        <li key={a.id} className="answer-li">
-                                                            <p className="answer-choice">
-                                                                <strong>Choice:</strong> {a.choice}</p>
-                                                            <p className="answer-reasoning">
-                                                                <strong>Reasoning:</strong> {a.reasoning}</p>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ) : (
-                                            <p className="no-answers-p">No answers yet</p>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    );
-                })}
+                                            {answers.length > 0 ? (
+                                                <div className="answers-div">
+                                                    <p className="answers-label"><strong>Answers:</strong></p>
+                                                    <ul className="answers-ul">
+                                                        {answers.map((a) => (
+                                                            <li key={a.id} className="answer-li">
+                                                                <p className="answer-choice">
+                                                                    <strong>Choice:</strong> {a.choice}</p>
+                                                                <p className="answer-reasoning">
+                                                                    <strong>Reasoning:</strong> {a.reasoning}</p>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ) : (
+                                                <p className="no-answers-p">No answers yet</p>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
             </div>
 
             {overlayMessage &&

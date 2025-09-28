@@ -38,7 +38,7 @@
 }
 
 .add-judge-btn {
-    margin-top: 1rem;
+    margin-top: 0;
     padding: 0.5rem 1rem;
     background: #0077ff;
     color: white;
@@ -102,4 +102,23 @@ p {
     100% {
         transform: rotate(360deg);
     }
+}
+
+.empty-judges {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    border: 1px dashed #e5e7eb;
+    border-radius: 8px;
+    background-color: #fafafa;
+    color: #6b7280;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.judge-title-div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 0.5rem;
 }
