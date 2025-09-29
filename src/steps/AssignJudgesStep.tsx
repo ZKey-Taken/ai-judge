@@ -1,8 +1,9 @@
 import {type FC, useState} from "react";
 import type {
     AnswerInsert,
-    AssignedJudgesId,
     AssignJudgesProps,
+    Judge,
+    JudgeAssignments,
     QuestionInsert,
     SubmissionInsert
 } from "../lib/Types.ts";
@@ -16,7 +17,7 @@ import {convertToString, rollbackSubmissions} from "../lib/Helper.ts";
 const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep}) => {
     const {data: judges = [], isLoading: loadingJudges, error} = useFetchJudgesQuery(userId);
 
-    const [assignments, setAssignments] = useState<AssignedJudgesId>({});
+    const [assignments, setAssignments] = useState<JudgeAssignments>({});
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [isSaved, setIsSaved] = useState<boolean>(false);
     const [overlayMessage, setOverlayMessage] = useState<string>("");
@@ -25,13 +26,16 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
     const allQuestionIds: string[] = appendix.flatMap(app => app.questions.map(q => q.data.id));
     const allQuestionsHaveJudge: boolean = allQuestionIds.length > 0 && allQuestionIds.every(qid => (assignments[qid]?.length || 0) > 0);
 
-    const handleToggleJudge = (questionId: string, judgeId: string) => {
-        setAssignments((prevState) => {
-            const current = prevState[questionId] || [];
-            const updated = current.includes(judgeId)
-                ? current.filter((id) => id !== judgeId) // remove if already selected
-                : [...current, judgeId]; // add otherwise
-            return {...prevState, [questionId]: updated};
+    const handleToggleJudge = (questionId: string, judge: Judge) => {
+        setAssignments(prev => {
+            const current = prev[questionId] || [];
+            const exists = current.some(j => j.id === judge.id);
+
+            const updated = exists
+                ? current.filter(j => j.id !== judge.id) // remove by id
+                : [...current, judge]; // add a judge object
+
+            return {...prev, [questionId]: updated};
         });
     };
 
@@ -108,8 +112,8 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
             }
 
             // 5) Insert question_judges from selection
-            const qjRows = Object.entries(assignments).flatMap(([question_id, judgeIds]) =>
-                (judgeIds || []).map((judge_id) => ({question_id, judge_id}))
+            const qjRows = Object.entries(assignments).flatMap(([question_id, judges]) =>
+                (judges || []).map((judge) => ({question_id, judge_id: judge.id}))
             );
 
             if (qjRows.length > 0) {
@@ -136,11 +140,11 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
             setOverlayMessage("Please assign at least one judge to every question before continuing.");
             return;
         } else if (isSaved) {
-            onNextStep();
+            onNextStep(assignments);
             return;
         }
         const ok = await handleSave();
-        if (ok) onNextStep();
+        if (ok) onNextStep(assignments);
     }
 
     if (loadingJudges) return <p>Loading judges...</p>;
@@ -180,8 +184,8 @@ const AssignJudgesStep: FC<AssignJudgesProps> = ({appendix, userId, onNextStep})
                                                 <input
                                                     type="checkbox"
                                                     className="assign-judges-input-checkbox"
-                                                    checked={assignments[q.data.id]?.includes(judge.id) || false}
-                                                    onChange={() => handleToggleJudge(q.data.id, judge.id)}
+                                                    checked={assignments[q.data.id]?.some(j => j.id === judge.id) || false}
+                                                    onChange={() => handleToggleJudge(q.data.id, judge)}
                                                 />
                                                 <p className="assign-judges-judge-name">{judge.name}</p>
                                             </label>

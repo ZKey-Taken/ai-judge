@@ -1,6 +1,6 @@
 import {type FC, useState} from "react";
 import "./HomePage.css";
-import {type Appendix, type HomePageProps, Steps} from "../lib/Types.ts";
+import {type Appendix, type HomePageProps, type JudgeAssignments, Steps} from "../lib/Types.ts";
 import UploadFileStep from "../steps/UploadFileStep.tsx";
 import AssignJudgesStep from "../steps/AssignJudgesStep.tsx";
 
@@ -9,9 +9,19 @@ const HomePage: FC<HomePageProps> = ({userId}) => {
     const [evaluationComplete, setEvaluationComplete] = useState<boolean>(false);
     const [appendix, setAppendix] = useState<Appendix[]>([]);
 
-    const runEvaluation = () => {
+    const runEvaluation = (assignments: JudgeAssignments) => {
         try {
             setEvaluationComplete(false);
+
+            console.log("Assignments:", assignments);
+
+            // const res = await fetch("/supabase/functions/run-ai-judges", {
+            //     method: "POST",
+            //     headers: {"Content-Type": "application/json"},
+            //     body: JSON.stringify({appendix,}),
+            // });
+            // const data = await res.json();
+            // console.log("AI Judges done:", data);
 
         } catch (error) {
             console.log(error)
@@ -24,7 +34,7 @@ const HomePage: FC<HomePageProps> = ({userId}) => {
         <div className="home-page">
             {currentStep === Steps.UploadFile &&
                 <UploadFileStep
-                    onNextStep={(givenAppendixArr) => {
+                    onNextStep={(givenAppendixArr: Appendix[]) => {
                         setAppendix(givenAppendixArr);
                         setCurrentStep(Steps.AssignJudges);
                     }}
@@ -34,8 +44,8 @@ const HomePage: FC<HomePageProps> = ({userId}) => {
                 <AssignJudgesStep
                     appendix={appendix}
                     userId={userId}
-                    onNextStep={() => {
-                        runEvaluation();
+                    onNextStep={(assignments: JudgeAssignments) => {
+                        runEvaluation(assignments);
                         setCurrentStep(Steps.RunEvaluations);
                     }}
                 />
