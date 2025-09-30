@@ -3,28 +3,28 @@ import "./HomePage.css";
 import {type Appendix, type HomePageProps, type JudgeAssignments, Steps} from "../lib/Types.ts";
 import UploadFileStep from "../steps/UploadFileStep.tsx";
 import AssignJudgesStep from "../steps/AssignJudgesStep.tsx";
+import {supabase} from "../lib/Supabase.ts";
 
 const HomePage: FC<HomePageProps> = ({userId}) => {
     const [currentStep, setCurrentStep] = useState<Steps>(Steps.UploadFile);
     const [evaluationComplete, setEvaluationComplete] = useState<boolean>(false);
     const [appendix, setAppendix] = useState<Appendix[]>([]);
 
-    const runEvaluation = (assignments: JudgeAssignments) => {
+    const runEvaluation = async (assignments: JudgeAssignments) => {
         try {
             setEvaluationComplete(false);
 
-            console.log("Assignments:", assignments);
+            const { data, error } = await supabase.functions.invoke("run-evaluation", {
+                body: { appendix, assignments },
+            });
 
-            // const res = await fetch("/supabase/functions/run-ai-judges", {
-            //     method: "POST",
-            //     headers: {"Content-Type": "application/json"},
-            //     body: JSON.stringify({appendix,}),
-            // });
-            // const data = await res.json();
-            // console.log("AI Judges done:", data);
-
+            if (error) {
+                console.error("run-evaluation error:", error);
+            } else {
+                console.log("AI Judges done:", data);
+            }
         } catch (error) {
-            console.log(error)
+            console.log(error);
         } finally {
             setEvaluationComplete(true);
         }

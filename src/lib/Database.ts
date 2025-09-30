@@ -71,6 +71,54 @@ export type Database = {
           },
         ]
       }
+      evaluations: {
+        Row: {
+          created_at: string
+          id: string
+          judge_id: string
+          model_name: string
+          question_id: string
+          reasoning: string
+          user_id: string
+          verdict: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          judge_id: string
+          model_name: string
+          question_id: string
+          reasoning: string
+          user_id?: string
+          verdict: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          judge_id?: string
+          model_name?: string
+          question_id?: string
+          reasoning?: string
+          user_id?: string
+          verdict?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluations_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "judges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evaluations_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       judges: {
         Row: {
           created_at: string
