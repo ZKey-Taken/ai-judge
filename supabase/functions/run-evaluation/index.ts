@@ -132,7 +132,7 @@ function parseVerdictFromText(content: string): { verdict: Verdict; reasoning: s
     return {verdict, reasoning};
 }
 
-async function callGroq(system: string, questionText: string, answerChoice: string | string[], answerReasoning: string): Promise<{
+async function callGroq(system: string, questionText: string, answerChoice: string | string[], answerReasoning: string, model?: string): Promise<{
     verdict: Verdict;
     reasoning: string;
     raw: string
@@ -147,7 +147,7 @@ async function callGroq(system: string, questionText: string, answerChoice: stri
     ].join("\n\n");
 
     const body = {
-        model: "llama-3.1-8b-instant",
+        model: model || "llama-3.1-8b-instant",
         temperature: 0,
         response_format: {type: "json_object"},
         messages: [
@@ -174,7 +174,7 @@ async function callGroq(system: string, questionText: string, answerChoice: stri
     return {...parsed, raw: content};
 }
 
-async function callHuggingFace(system: string, questionText: string, answerChoice: string | string[], answerReasoning: string): Promise<{
+async function callHuggingFace(system: string, questionText: string, answerChoice: string | string[], answerReasoning: string, model?: string): Promise<{
     verdict: Verdict;
     reasoning: string;
     raw: string
@@ -189,7 +189,7 @@ async function callHuggingFace(system: string, questionText: string, answerChoic
         "Answer reasoning:", answerReasoning,
     ].join("\n\n");
 
-    const hfModel = Deno.env.get("HF_MODEL") || "mistralai/Mistral-7B-Instruct-v0.2";
+    const hfModel = model || Deno.env.get("HF_MODEL") || "mistralai/Mistral-7B-Instruct-v0.2";
     const resp = await fetch(`https://api-inference.huggingface.co/models/${encodeURIComponent(hfModel)}`, {
         method: "POST",
         headers: {
@@ -236,6 +236,51 @@ async function callFreeLLM(system: string, questionText: string, answerChoice: s
     const verdict: Verdict = lower.includes("correct") || lower.includes("right") ? "pass" : (lower.includes("incorrect") || lower.includes("wrong") ? "fail" : "inconclusive");
     const reasoning = "Heuristic fallback used due to missing free LLM API key(s).";
     return {verdict, reasoning, raw: combined, provider: "heuristic"};
+}
+
+// Determine provider from judge.model_name
+type ProviderKind = "groq" | "huggingface" | "heuristic" | "auto";
+
+function providerFromModelName(modelName: string): { kind: ProviderKind; model?: string } {
+    const m = (modelName || "").trim();
+    if (m.toLowerCase() === "heuristic") return { kind: "heuristic" };
+    if (m.startsWith("groq/")) return { kind: "groq", model: m.slice(5) || "llama-3.1-8b-instant" };
+    if (m.startsWith("hf/")) return { kind: "huggingface", model: m.slice(3) };
+    // Treat auto-free and any unknown value as auto
+    return { kind: "auto" };
+}
+
+async function evaluateByModelName(
+    modelName: string,
+    system: string,
+    questionText: string,
+    answerChoice: string | string[],
+    answerReasoning: string,
+): Promise<{ verdict: Verdict; reasoning: string; raw: string; provider: string }> {
+    const { kind, model } = providerFromModelName(modelName);
+    if (kind === "groq") {
+        const r = await callGroq(system, questionText, answerChoice, answerReasoning, model);
+        return { ...r, provider: "groq" };
+    }
+    if (kind === "huggingface") {
+        const r = await callHuggingFace(system, questionText, answerChoice, answerReasoning, model);
+        return { ...r, provider: "huggingface" };
+    }
+    if (kind === "heuristic") {
+        const combined = [
+            questionText,
+            Array.isArray(answerChoice) ? answerChoice.join(", ") : String(answerChoice),
+            answerReasoning,
+        ].join("\n");
+        const lower = combined.toLowerCase();
+        const verdict: Verdict = lower.includes("correct") || lower.includes("right")
+            ? "pass"
+            : (lower.includes("incorrect") || lower.includes("wrong") ? "fail" : "inconclusive");
+        const reasoning = "Heuristic evaluation as selected by judge.model_name.";
+        return { verdict, reasoning, raw: combined, provider: "heuristic" };
+    }
+    // Auto
+    return callFreeLLM(system, questionText, answerChoice, answerReasoning);
 }
 
 async function persistEvaluationBestEffort(supabase: SupabaseClient<Database>, ev: EvaluationInsert) {
@@ -337,7 +382,7 @@ Deno.serve(async (req) => {
 
             for (const judge of judges) {
                 try {
-                    const ai = await callFreeLLM(judge.system_prompt, qText, ans.choice, ans.reasoning);
+                    const ai = await evaluateByModelName(judge.model_name, judge.system_prompt, qText, ans.choice, ans.reasoning);
                     const ev: EvaluationInsert = {
                         question_id: questionId,
                         judge_id: judge.id,

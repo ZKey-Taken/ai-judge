@@ -26,6 +26,13 @@ export const JudgeItem: FC<JudgeItemProps> = ({
     const [model, setModel] = useState(judge.model_name);
     const [active, setActive] = useState<boolean>(judge.is_active);
 
+    const knownModelOptions = [
+        { value: "auto-free", label: "Auto (Free LLM: Groq → HF → Heuristic)" },
+        { value: "groq/llama-3.1-8b-instant", label: "Groq: llama-3.1-8b-instant" },
+        { value: "hf/mistralai/Mistral-7B-Instruct-v0.2", label: "Hugging Face: Mistral-7B-Instruct" },
+        { value: "heuristic", label: "Heuristic (no external API)" },
+    ] as const;
+
     const canSave = useMemo(() => {
         return name.trim().length > 0 && prompt.trim().length > 0 && model.trim().length > 0;
     }, [name, prompt, model]);
@@ -123,10 +130,12 @@ export const JudgeItem: FC<JudgeItemProps> = ({
 
                 <div className="model-active-row" style={{gap: 12}}>
                     <select value={model} onChange={(e) => setModel(e.target.value)}>
-                        <option value="gpt-4">GPT-4</option>
-                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                        <option value="claude-2">Claude 2</option>
-                        <option value="gemini-pro">Gemini Pro</option>
+                        {knownModelOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                        {!knownModelOptions.some(opt => opt.value === model) && (
+                            <option value={model}>{`Custom: ${model}`}</option>
+                        )}
                     </select>
 
                     <label className="judge-active-button">

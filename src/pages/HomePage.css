@@ -4,3 +4,9 @@
     align-items: center;
     height: 100%;
 }
+
+.home-page-p {
+    color: black;
+    font-size: 1.75rem;
+    font-weight: 600;
+}

@@ -10,7 +10,7 @@ export const AddJudgeOverlay: FC<AddJudgeOverlayProps> = ({
                                                           }) => {
     const [name, setName] = useState<string>("");
     const [prompt, setPrompt] = useState<string>("");
-    const [model, setModel] = useState<string>("gpt-4");
+    const [model, setModel] = useState<string>("auto-free");
     const [active, setActive] = useState<boolean>(true);
     const [submitting, setSubmitting] = useState<boolean>(false);
 
@@ -75,10 +75,10 @@ export const AddJudgeOverlay: FC<AddJudgeOverlayProps> = ({
 
                     <div className="add-judge-model-active-row">
                         <select value={model} onChange={(e) => setModel(e.target.value)}>
-                            <option value="gpt-4">GPT-4</option>
-                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                            <option value="claude-2">Claude 2</option>
-                            <option value="gemini-pro">Gemini Pro</option>
+                            <option value="auto-free">Auto (Free LLM: Groq → HF → Heuristic)</option>
+                            <option value="groq/llama-3.1-8b-instant">Groq: llama-3.1-8b-instant</option>
+                            <option value="hf/mistralai/Mistral-7B-Instruct-v0.2">Hugging Face: Mistral-7B-Instruct</option>
+                            <option value="heuristic">Heuristic (no external API)</option>
                         </select>
 
                         <label className="add-judge-active-button">

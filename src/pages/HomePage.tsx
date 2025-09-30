@@ -14,8 +14,8 @@ const HomePage: FC<HomePageProps> = ({userId}) => {
         try {
             setEvaluationComplete(false);
 
-            const { data, error } = await supabase.functions.invoke("run-evaluation", {
-                body: { appendix, assignments },
+            const {data, error} = await supabase.functions.invoke("run-evaluation", {
+                body: {appendix, assignments},
             });
 
             if (error) {
@@ -44,17 +44,21 @@ const HomePage: FC<HomePageProps> = ({userId}) => {
                 <AssignJudgesStep
                     appendix={appendix}
                     userId={userId}
-                    onNextStep={(assignments: JudgeAssignments) => {
-                        runEvaluation(assignments);
+                    onNextStep={async (assignments: JudgeAssignments) => {
+                        await runEvaluation(assignments);
                         setCurrentStep(Steps.RunEvaluations);
                     }}
                 />
             }
             {currentStep === Steps.RunEvaluations &&
                 (evaluationComplete ?
-                        <p>Evaluation Complete</p>
+                        <p className="home-page-p">
+                            Evaluation Complete, goto Results page to view!
+                        </p>
                         :
-                        <p>Running Evaluation ...</p>
+                        <p className="home-page-p">
+                            Running Evaluation ...
+                        </p>
                 )
             }
         </div>
