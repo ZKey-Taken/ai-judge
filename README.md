@@ -1,73 +1,67 @@
-# React + TypeScript + Vite
+# AI-Judge
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A lightweight React + TypeScript app for managing judges, questions, submissions, and evaluations, powered by Supabase.
 
-Currently, two official plugins are available:
+## Tech stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 19 + Vite
+- TypeScript
+- Supabase (Auth, DB)
+- TanStack Query for data fetching/caching
+- React Router for routing
 
-## React Compiler
+## Getting started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Prerequisites
+    - Node 18+
+    - npm
+    - Supabase project (URL and anon/service keys)
 
-## Expanding the ESLint configuration
+2. Install
+    - npm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+3. Environment
+    - Copy .env.example to .env and set:
+        - VITE_SUPABASE_URL=
+        - VITE_SUPABASE_ANON_KEY=
+        - Optional: service role or function URLs if used
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+4. Run
+    - npm run dev
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+5. Build
+    - npm run build
+    - npm run preview
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Development notes
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- API access and auth are centralized around Supabase; avoid duplicating client setup.
+- Serverless/edge functions (e.g., evaluation runners) are isolated under supabase/functions.
+- Data fetching is wrapped in React Query hooks; prefer using existing hooks over ad-hoc fetches.
+- Routing is defined in the app shell; pages live in src/pages, shared UI in src/components.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Scope decisions and reasoning
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Kept stack minimal (React, Query, Router, Supabase) to reduce operational overhead and speed delivery.
+- Chose Supabase for auth + DB to avoid standing up custom backend; trade-off: vendor coupling accepted for faster
+  iteration.
+- Client-side rendering via Vite for simplicity; no SSR/SSG to keep deploy/runtime low-friction.
+- Query hooks abstract access patterns to promote consistency and cache correctness; avoids scattering fetch logic.
+- Styling kept simple with CSS modules/files instead of a heavy UI framework to retain control and keep bundle small.
+- Background evaluation handled via function boundaries to separate concerns and keep UI responsive.
+
+## Scripts
+
+- dev: start local dev server
+- build: production build
+- preview: serve built assets
+
+## Project structure
+
+- src/
+    - pages/: route-level views
+    - components/: reusable UI
+    - hooks/: custom React hooks
+    - lib/: clients, helpers, types
+    - queries/: React Query hooks
+- supabase/functions/: serverless logic
