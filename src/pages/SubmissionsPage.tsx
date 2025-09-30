@@ -7,6 +7,7 @@ import {useFetchSubmissionsQuery} from "../queries/useFetchSubmissionsQuery.tsx"
 import {useFetchQuestionsQuery} from "../queries/useFetchQuestionsQuery.tsx";
 import {useFetchAnswersQuery} from "../queries/useFetchAnswersQuery.tsx";
 import {useFetchQuestionJudgesQuery} from "../queries/useFetchQuestionJudgesQuery.tsx";
+import {useFetchEvaluationsQuery} from "../queries/useFetchEvaluationsQuery.tsx";
 
 const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
 
@@ -28,10 +29,20 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
 
     const {data: questionToAssignedJudges, isLoading: loadingQj, error: qjError} = useFetchQuestionJudgesQuery(userId);
 
+    const {
+        data: evaluations,
+        isLoading: loadingEvaluations,
+        error: evaluationsError
+    } = useFetchEvaluationsQuery(userId);
+
     const [overlayMessage, setOverlayMessage] = useState<string>("");
 
-    const anyLoading = loadingSubmissions || loadingQuestions || loadingAnswers || loadingQj;
-    const currentErrorMessage = overlayMessage || submissionsError?.message || questionsError?.message || answersError?.message || qjError?.message || "";
+    const anyLoading = loadingSubmissions || loadingQuestions || loadingAnswers || loadingQj || loadingEvaluations;
+    const currentErrorMessage = overlayMessage || submissionsError?.message || questionsError?.message || answersError?.message || qjError?.message || evaluationsError?.message || "";
+
+    const totalEvaluations: number = evaluations?.length ?? 0;
+    const passCount: number = evaluations?.filter(ev => (ev.verdict || "").toLowerCase() === "pass").length ?? 0;
+    const passRate: number = totalEvaluations > 0 ? Math.round((passCount / totalEvaluations) * 100) : 0;
 
     /*
     TODO:
@@ -41,6 +52,9 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
     return (
         <div className="submissions-page-container">
             <div className="submissions-outer-div">
+                {!anyLoading && (
+                    <h2 className="pass-rate-summary">{passRate} % pass of {totalEvaluations} evaluations</h2>
+                )}
                 {anyLoading ? (
                     <div className="loading-container">
                         <Loader2 className="spinner"/>
@@ -79,10 +93,12 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
                                             {/* Assigned judges display only */}
                                             {assigned.length > 0 ? (
                                                 <p className="question-assigned-judges">
-                                                    <strong>Assigned Judges:</strong> {assigned.map(j => j.name).join(", ")}
+                                                    <strong>Assigned
+                                                        Judges:</strong> {assigned.map(j => j.name).join(", ")}
                                                 </p>
                                             ) : (
-                                                <p className="question-assigned-judges"><strong>Assigned Judges:</strong> None</p>
+                                                <p className="question-assigned-judges"><strong>Assigned
+                                                    Judges:</strong> None</p>
                                             )}
 
                                             {answers.length > 0 ? (
@@ -102,6 +118,35 @@ const SubmissionsPage: FC<SubmissionsPageProps> = ({userId}) => {
                                             ) : (
                                                 <p className="no-answers-p">No answers yet</p>
                                             )}
+
+                                            {/* Evaluations for this question */}
+                                            {(() => {
+                                                const qEvals = (evaluations ?? []).filter(ev => ev.question_id === q.id);
+                                                return qEvals.length > 0 ? (
+                                                    <div className="evaluations-div">
+                                                        <p className="evaluations-label"><strong>Evaluations:</strong>
+                                                        </p>
+                                                        <ul className="evaluations-ul">
+                                                            {qEvals.map((ev) => {
+                                                                const judgeName = assigned.find(j => j.id === ev.judge_id)?.name ?? ev.judge_id;
+                                                                return (
+                                                                    <li key={ev.id} className="evaluation-li">
+                                                                        <p className="evaluation-judge">
+                                                                            <strong>Judge:</strong> {judgeName}</p>
+                                                                        <p className="evaluation-verdict">
+                                                                            <strong>Verdict:</strong> {ev.verdict}</p>
+                                                                        <p className="evaluation-reasoning">
+                                                                            <strong>Reasoning:</strong> {ev.reasoning}
+                                                                        </p>
+                                                                    </li>
+                                                                );
+                                                            })}
+                                                        </ul>
+                                                    </div>
+                                                ) : (
+                                                    <p className="no-evaluations-p">No evaluations yet</p>
+                                                );
+                                            })()}
                                         </div>
                                     );
                                 })}

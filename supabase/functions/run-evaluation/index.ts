@@ -240,15 +240,16 @@ async function callFreeLLM(system: string, questionText: string, answerChoice: s
 
 async function persistEvaluationBestEffort(supabase: SupabaseClient<Database>, ev: EvaluationInsert) {
     try {
-        const {error} = await supabase
+        const { error } = await supabase
             .from("evaluations")
             .insert(ev);
-        if (!error) return {storedIn: "db" as const};
-    } catch {
-        /* empty */
+        if (!error) return { storedIn: "db" as const };
+        console.error("Failed to insert evaluation:", error.message);
+    } catch (e) {
+        console.error("Exception inserting evaluation:", e instanceof Error ? e.message : String(e));
     }
 
-    return {storedIn: "none" as const};
+    return { storedIn: "none" as const };
 }
 
 console.log("run-evaluation function ready");
@@ -267,6 +268,34 @@ function getSupabaseClient(): SupabaseClient<Database> {
         );
     }
     return createClient<Database>(url, key);
+}
+
+function decodeBase64Url(input: string): string {
+    const pad = input.length % 4;
+    const base64 = input.replace(/-/g, "+").replace(/_/g, "/") + (pad ? "=".repeat(4 - pad) : "");
+    try {
+        return atob(base64);
+    } catch {
+        return "";
+    }
+}
+
+function getUserIdFromRequest(req: Request): string | null {
+    const auth = req.headers.get("Authorization") ?? "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+    if (!token) return null;
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    try {
+        const payloadJson = decodeBase64Url(parts[1]);
+        const payload = JSON.parse(payloadJson) as Record<string, unknown>;
+        const sub = payload.sub;
+        if (typeof sub === "string" && sub.length > 0) return sub;
+        const uid = (payload.user_id ?? (payload as Record<string, unknown>)["userId"]) as unknown;
+        return typeof uid === "string" ? uid : null;
+    } catch {
+        return null;
+    }
 }
 
 Deno.serve(async (req) => {
@@ -294,6 +323,7 @@ Deno.serve(async (req) => {
         const assignments: JudgeAssignments = toJudgeAssignments(assignmentsRaw);
 
         const supabase = getSupabaseClient();
+        const userIdFromReq = getUserIdFromRequest(req);
         const evaluations: EvaluationInsert[] = [];
         const failures: { question_id: string; judge_id: string; error: string }[] = [];
 
@@ -314,6 +344,7 @@ Deno.serve(async (req) => {
                         verdict: ai.verdict,
                         reasoning: ai.reasoning,
                         model_name: judge.model_name,
+                        user_id: userIdFromReq ?? judge.user_id,
                     };
                     evaluations.push(ev);
                     await persistEvaluationBestEffort(supabase, ev);

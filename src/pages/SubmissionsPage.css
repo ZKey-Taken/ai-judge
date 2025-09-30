@@ -92,3 +92,108 @@
     text-align: center;
     font-size: 0.95rem;
 }
+
+/**
+  Additional styles for SubmissionsPage components introduced in recent updates
+*/
+
+/* Pass rate summary banner */
+.pass-rate-summary {
+    margin: 0 0 1rem 0;
+    padding: 0.6rem 0.9rem;
+    background: #eef2ff; /* indigo-50 */
+    color: #3730a3;      /* indigo-800 */
+    border: 1px solid #c7d2fe; /* indigo-200 */
+    border-radius: 8px;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Loading row with spinner */
+.loading-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6b7280; /* gray-500 */
+    padding: 0.75rem 0.25rem;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    color: #4f46e5; /* indigo-600 */
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Assigned judges line */
+.question-assigned-judges {
+    margin: 0.25rem 0;
+    color: #374151; /* gray-700 */
+}
+
+/* Evaluations block */
+.evaluations-div {
+    margin-top: 0.75rem;
+}
+
+.evaluations-label {
+    margin: 0 0 0.25rem 0;
+    color: #374151; /* gray-700 */
+    font-weight: 600;
+}
+
+.evaluations-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.evaluation-li {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    border: 1px solid #e5e7eb; /* gray-200 */
+    border-left: 4px solid #e5e7eb; /* subtle accent */
+    border-radius: 8px;
+    background-color: #ffffff;
+    padding: 0.75rem;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.evaluation-li:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+.evaluation-judge,
+.evaluation-verdict,
+.evaluation-reasoning,
+.no-evaluations-p {
+    margin: 2px 0 0 0;
+    color: #374151; /* gray-700 */
+    font-size: 0.95rem;
+}
+
+.evaluation-verdict strong {
+    margin-right: 4px;
+}
+
+/* Empty evaluations text */
+.no-evaluations-p {
+    color: #6b7280; /* gray-500 */
+}
+
+/* Optional: tidy the submission header */
+.submission-div > h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: #111827; /* gray-900 */
+}

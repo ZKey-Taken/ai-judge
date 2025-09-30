@@ -17,6 +17,9 @@ export type AnswerInsert = Database["public"]["Tables"]["answers"]["Insert"];
 export type QuestionJudges = Database['public']['Tables']['question_judges']['Row'];
 export type QuestionJudgesInsert = Database['public']['Tables']['question_judges']['Insert'];
 
+export type Evaluation = Database['public']['Tables']['evaluations']['Row'];
+export type EvaluationInsert = Database['public']['Tables']['evaluations']['Insert'];
+
 
 // Props
 export type HomePageProps = {
